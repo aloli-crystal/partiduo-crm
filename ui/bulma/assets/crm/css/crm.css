@@ -1,0 +1,82 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Relation client (extension CRM, ADR-009) : pipeline en colonnes, tableau
+   de bord, « Mes activités », import. Jetons de couleur de theme.css de
+   partiduo-ui-bulma (thème sombre compris), propriétés logiques seulement,
+   cibles de 44 px, focus visible. Téléphone d'abord : colonnes empilées ;
+   sur tablette et ordinateur, colonnes côte à côte qui défilent. */
+
+.crm-inline { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.crm-inline .label { margin: 0; }
+.crm-inline .input { inline-size: auto; max-inline-size: 12rem; }
+.crm-pipeline-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; margin-block-end: .5rem; }
+.crm-total { margin-block: 0 .5rem; margin-inline: 0; color: var(--pd-muted); text-align: end; }
+.crm-total strong { color: var(--pd-ink); font-variant-numeric: tabular-nums; }
+
+.crm-columns { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+.crm-column { background: var(--pd-row-alt); border: 1px solid var(--pd-rule); border-radius: var(--bulma-radius); padding: .6rem;
+  display: flex; flex-direction: column; gap: .5rem; min-inline-size: 0; }
+.crm-column.is-over { outline: 2px dashed var(--pd-focus); outline-offset: 2px; }
+.crm-column-head h2 { font-size: .9rem; font-weight: 600; color: var(--pd-ink); display: flex; align-items: center; gap: .4rem; }
+.crm-column-sum { font-size: .8rem; margin: 0; overflow-wrap: anywhere; }
+.crm-column-won { border-block-start: 3px solid var(--pd-ok); }
+.crm-column-lost { border-block-start: 3px solid var(--pd-gap); }
+.crm-cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.crm-empty { font-size: .85rem; margin: 0; }
+
+.crm-card { background: var(--pd-surface); border: 1px solid var(--pd-rule); border-radius: var(--bulma-radius-small, .375rem);
+  padding: .6rem .7rem; display: flex; flex-direction: column; gap: .3rem; cursor: grab; }
+.crm-card:focus-visible { outline: 2px solid var(--pd-focus); outline-offset: 2px; }
+.crm-card.is-dragging { opacity: .55; }
+.crm-card-alert { border-inline-start: 4px solid var(--pd-warn); }
+.crm-card h3 { font-size: .9rem; font-weight: 600; line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
+.crm-card h3 a { color: var(--pd-ink); }
+.crm-card p { margin: 0; }
+.crm-card-org, .crm-card-meta { font-size: .8rem; color: var(--pd-muted); overflow-wrap: anywhere; }
+.crm-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem; }
+.crm-card-meta .pd-icon { inline-size: .9rem; block-size: .9rem; }
+.crm-card-figures { font-size: .85rem; font-variant-numeric: tabular-nums; }
+.crm-card-move { display: flex; flex-wrap: wrap; gap: .35rem; margin-block-start: .2rem; }
+.crm-card-move .button { min-block-size: 44px; min-inline-size: 44px; }
+
+/* Tableau de bord commercial et « Mes activités ». */
+.crm-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.crm-bar { display: grid; grid-template-columns: minmax(7rem, 1fr) minmax(0, 2fr) auto; gap: .5rem; align-items: center; font-size: .85rem; }
+.crm-bar-track { block-size: .6rem; background: var(--pd-row-alt); border-radius: 1rem; overflow: hidden; }
+.crm-bar-fill { display: block; block-size: 100%; background: var(--bulma-primary); border-radius: 1rem; }
+.crm-bar-value { font-family: var(--bulma-family-code); font-variant-numeric: tabular-nums; text-align: end; }
+.crm-agenda { list-style: none; margin: 0; padding: 0; }
+.crm-agenda > li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; padding: .6rem 1rem; border-block-end: 1px solid var(--pd-rule); }
+.crm-agenda > li:last-child { border-block-end: 0; }
+.crm-agenda-main { flex: 1 1 16rem; min-inline-size: 0; display: flex; flex-direction: column; gap: .15rem; }
+.crm-agenda-main small { color: var(--pd-muted); overflow-wrap: anywhere; }
+.crm-agenda-when { font-family: var(--bulma-family-code); font-size: .85rem; min-inline-size: 6.5rem; }
+.crm-agenda-late .crm-agenda-when { color: var(--pd-gap); font-weight: 600; }
+.crm-agenda-acts { display: flex; flex-wrap: wrap; gap: .35rem; }
+.crm-agenda-acts form { display: inline; }
+
+/* Import CSV : aperçu. */
+.crm-mapping { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .75rem; }
+.crm-mapping .field { margin: 0; }
+.crm-preview td.crm-skip { color: var(--pd-muted); }
+.crm-preview tr.crm-row-skip { background: var(--pd-warn-bg); }
+.crm-preview tr.crm-row-error { background: var(--pd-gap-bg); }
+.crm-settings-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(4rem, 6rem) minmax(4rem, 6rem) auto auto; gap: .5rem; align-items: end;
+  padding: .5rem 1rem; border-block-end: 1px solid var(--pd-rule); }
+.crm-settings-short { grid-template-columns: minmax(0, 2fr) minmax(4rem, 6rem) auto auto; }
+.crm-settings-row .field { margin: 0; }
+.crm-settings-row .input, .crm-settings-row .button { min-block-size: 44px; }
+
+@media (min-width: 768px) {
+  .crm-columns { grid-auto-flow: column; grid-auto-columns: minmax(15rem, 1fr); grid-template-columns: none; overflow-x: auto;
+    padding-block-end: .5rem; }
+}
+
+@media (max-width: 767.98px) {
+  .crm-settings-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .crm-settings-row .crm-settings-name { grid-column: 1 / -1; }
+}
+
+@media print {
+  .crm-card-move, .crm-agenda-acts { display: none; }
+}
+.crm-settings-row .help.is-danger { grid-column: 1 / -1; margin: 0; }

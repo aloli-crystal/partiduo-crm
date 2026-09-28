@@ -1,0 +1,138 @@
+= partiduo-crm — relation client
+:toc: left
+:toc-title: Table des matières
+:icons: font
+
+*Partiduo* est le portage en Crystal de https://noalyss.eu[NOALYSS], logiciel
+libre de comptabilité créé et maintenu par *Dany De Bontridder*. Partiduo
+n'est pas un projet officiel NOALYSS.
+
+Ce dépôt est l'extension `CRM` de Partiduo (ADR-009), sans équivalent dans
+le logiciel d'origine : le suivi commercial *avant* le devis — qui démarcher,
+où en est chaque affaire, quoi faire ensuite — jusqu'au devis et à la
+facture du module Facturation.
+
+La spécification est dans `../partiduo-docs/adr/ADR-009-crm.adoc` (D1 à D8),
+avec ADR-003 (contrat d'extension, événements), ADR-005 (interface) et
+ADR-006 (Facturation). État, décisions (`D-CRM-*`) et blocages (`B-CRM-*`) :
+link:doc/ETAT.adoc[]. Référence du contrat : link:doc/api/crm.adoc[].
+
+== Fonctions
+
+[cols="1,3",options="header"]
+|===
+|Fonction |Dans CRM
+
+|Organisations (D2)
+|Prospects propres au CRM (aucune fiche comptable) ou clients rattachés à une
+fiche du cœur. « Devenir client » crée la fiche par `Partiduo::Api::Cards`.
+Une fiche client créée hors du CRM y apparaît (`card.saved`).
+
+|Contacts et RGPD (D2)
+|Civilité, nom, fonction, courriels, téléphones ; origine, base légale datée,
+opposition datée (le contact sort des listes, de l'export et des nouvelles
+actions) ; effacement tant qu'aucun devis ne le cite.
+
+|Opportunités et pipeline (D3)
+|Montant estimé HT, probabilité, clôture prévue, responsable, origine.
+Étapes paramétrables (Découverte 10 %, Qualification 25 %, Proposition 50 %,
+Négociation 75 %, Gagnée, Perdue avec motif). Vue en colonnes : boutons ← →,
+glisser-déposer, Maj+← / Maj+→ au clavier, HTMX ; liste filtrable ;
+historique des étapes.
+
+|Activités (D4)
+|Appel, rendez-vous, courriel, tâche, note ; « Mes activités » (en retard,
+aujourd'hui, à venir) ; opportunités « sans suite prévue ».
+
+|Devis (D5)
+|« Créer un devis » : brouillon par `Partiduo::Api::Invoicing.create_document`,
+lié à l'opportunité (plusieurs versions possibles). `quote.decided` : accepté
+→ Gagnée, refusé → activité « relancer ». `invoice.issued` : facture
+rattachée.
+
+|Tableau de bord (D6)
+|Pipeline pondéré par étape et par responsable, gagnées et perdues, taux de
+transformation, motifs de perte, retards, chiffre d'affaires facturé lu dans
+la Facturation ; tuile « Commercial » et compteur « Mes activités ».
+
+|Droits (D7)
+|`crm.read`, `crm.write`, `crm.admin` ; créer un devis exige aussi
+`invoicing.invoice.write`, faire devenir client `cards.card.write`.
+
+|Import et export (D8)
+|Import CSV des organisations et contacts (séparateur reconnu, en-têtes fr,
+en, nl, correspondance ajustable, doublons par SIREN, courriel ou nom) ;
+export CSV de chaque liste et des contacts pour une action commerciale.
+|===
+
+== Organisation
+
+[source]
+----
+src/
+├── partiduo-crm.cr            # point d'entrée du shard
+├── partiduo-crm/cli.cr        # migrations : require "partiduo-crm/cli"
+└── crm/                       # métier (application Marten « crm »)
+    ├── app.cr, manifest.cr    # code CRM, permissions, menus, abonnements
+    ├── models/                # tables crm_*
+    ├── migrations/            # 0001 : tables, contraintes, valeurs initiales
+    ├── services/              # règles, pipeline, conversion, abonnés, import (interne)
+    ├── api/                   # contrat public Crm::Api
+    └── locales/               # fr, en, nl
+ui/
+└── bulma/                     # interface pour partiduo-ui-bulma (application « crm_ui »)
+    ├── bulma.cr               # routes sous /ext/CRM/, compteur du menu
+    ├── dashboard_tile.cr      # tuile « Commercial » (B-CRM-001)
+    ├── handlers/, templates/crm/, assets/crm/, locales/
+scripts/demo.cr                # instance de démonstration
+----
+
+== Composer une distribution
+
+[source,crystal]
+----
+require "partiduo-ui-bulma/partiduo_ui"
+require "partiduo-crm"
+require "partiduo-crm/ui/bulma"
+# installed_apps += Crm::INSTALLED_APPS + Crm::Ui::INSTALLED_APPS
+# ligne de commande : require "partiduo-crm/cli"
+----
+
+L'extension exige le module Facturation (`depends_on "INVOICING"`) ; elle
+s'active par dossier (`Partiduo::Api::Modules.activate`, écran « Modules »).
+
+== Commandes
+
+[source,sh]
+----
+cd prod-crystal/partiduo/partiduo-crm
+SKIP_MARTEN_CLI_PRECOMPILATION=1 shards install
+createdb -h /tmp partiduo_test_<agent>
+DATABASE_URL='postgres:///partiduo_test_<agent>?host=/tmp' crystal spec --order random
+crystal tool format src spec ui config scripts manage.cr && bin/ameba
+----
+
+== Démonstration dans un navigateur
+
+`scripts/demo.cr` migre une base vide, provisionne le dossier « Atelier
+Brunet SARL », crée deux utilisateurs, active l'extension et charge des
+données de démonstration (prospects et clients, contacts dont un opposé à la
+prospection, opportunités à toutes les étapes, un devis, activités en
+retard, du jour et à venir), puis sert l'instance :
+
+[source,sh]
+----
+createdb -h /tmp partiduo_crm_demo
+DATABASE_URL='postgres:///partiduo_crm_demo?host=/tmp' PORT=8010 crystal run scripts/demo.cr
+----
+
+Ouvrir http://127.0.0.1:8010/ext/CRM/pipeline et se connecter avec
+`demo@crm.partiduo.test` / `Tournesol-Vitrine-2026` (constantes
+`DEMO_EMAIL`, `DEMO_PASSWORD` du script ; base locale seulement). Second
+utilisateur : `bruno@crm.partiduo.test`, même mot de passe. Les lancements
+suivants reprennent la base telle quelle ; `dropdb` pour repartir de zéro.
+Arrêt : Ctrl+C.
+
+== Licence
+
+AGPL-3.0-or-later (voir `LICENSE`).

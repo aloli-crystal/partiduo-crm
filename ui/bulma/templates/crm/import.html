@@ -1,0 +1,81 @@
+{# SPDX-License-Identifier: AGPL-3.0-or-later. Import CSV des organisations et contacts (ADR-009 D8), en trois temps : fichier ou texte collé (séparateur ; , ou tabulation reconnu), aperçu avec la correspondance des colonnes à ajuster et les doublons signalés (SIREN, courriel, nom), puis bilan. Formulaires ordinaires, sans JavaScript. #}{% extend "ui/base.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block scripts %}<link rel="stylesheet" href="{% asset 'crm/css/crm.css' %}">{% endblock scripts %}
+{% block crumbs %}{% include "ui/_crumbs.html" %}{% endblock crumbs %}
+{% block heading %}{{ title }} <span class="pd-ext">CRM</span>{% endblock heading %}
+{% block content %}
+{% if error %}<div class="notification is-danger is-light pd-alert" role="alert" id="crm-import-error">{% include "ui/_icon.html" with name="triangle-alert" %}<div><p>{{ error }}</p></div></div>{% endif %}
+{% if step == "start" %}
+<section class="pd-panel" aria-labelledby="crm-import-file">
+  <header><h2 id="crm-import-file">{% translate "crm_ui.import.file_title" %}</h2></header>
+  <div class="pd-body">
+    <form method="post" action="{% url 'crm:import' %}" enctype="multipart/form-data" class="pd-form" novalidate data-crm-import>
+      {% csrf_input %}
+      <input type="hidden" name="step" value="preview">
+      <div class="field"><label class="label" for="crm-import-upload">{% translate "crm_ui.import.file" %}</label>
+        <input class="input" type="file" id="crm-import-upload" name="file" accept=".csv,text/csv,text/plain" aria-describedby="crm-import-file-help{% if error %} crm-import-error{% endif %}"></div>
+      <p class="help" id="crm-import-file-help">{% translate "crm_ui.import.file_help" %}</p>
+      <div class="field"><label class="label" for="crm-import-content">{% translate "crm_ui.import.paste" %}</label>
+        <textarea class="textarea pd-mono" id="crm-import-content" name="content" rows="6"{% if error %} aria-invalid="true" aria-describedby="crm-import-error"{% endif %}></textarea></div>
+      <div class="pd-form-grid">
+        <div class="field"><label class="label" for="crm-import-basis">{% translate "crm_ui.contacts.legal_basis" %}</label>
+          <div class="select is-fullwidth"><select id="crm-import-basis" name="legal_basis" aria-describedby="crm-import-basis-help">{% for option in legal_bases %}<option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></div>
+          <p class="help" id="crm-import-basis-help">{% translate "crm_ui.import.basis_help" %}</p></div>
+        <div class="field"><label class="label" for="crm-import-source">{% translate "crm_ui.contacts.source" %}</label>
+          <div class="select is-fullwidth"><select id="crm-import-source" name="source_id">{% for option in sources %}<option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></div></div>
+      </div>
+      <div class="pd-form-actions"><button class="button is-primary pd-touch" type="submit">{% include "ui/_icon.html" with name="upload" %}<span>{% translate "crm_ui.import.preview" %}</span></button></div>
+    </form>
+  </div>
+</section>
+<section class="pd-panel" aria-labelledby="crm-import-fields">
+  <header><h2 id="crm-import-fields">{% translate "crm_ui.import.fields_title" %}</h2></header>
+  <div class="pd-body"><p class="help mb-2">{% translate "crm_ui.import.fields_help" %}</p><ul class="pd-list">{% for item in fields %}<li>{{ item.label }}</li>{% endfor %}</ul></div>
+</section>
+{% endif %}
+{% if step == "preview" %}
+<form method="post" action="{% url 'crm:import' %}" class="pd-form" novalidate data-crm-preview>
+  {% csrf_input %}
+  <input type="hidden" name="mapped" value="1">
+  <input type="hidden" name="legal_basis" value="{{ legal_basis }}">
+  <input type="hidden" name="source_id" value="{{ source_id }}">
+  <textarea name="content" hidden aria-hidden="true">{{ content }}</textarea>
+  {% if columns %}
+  <section class="pd-panel" aria-labelledby="crm-import-mapping">
+    <header><h2 id="crm-import-mapping">{% translate "crm_ui.import.mapping" %}</h2></header>
+    <div class="pd-body">
+      <p class="help mb-3">{% translate "crm_ui.import.mapping_help" %}</p>
+      <div class="crm-mapping">{% for column in columns %}<div class="field"><label class="label" for="crm-map-{{ column.index }}">{% translate "crm_ui.import.column" %} « {{ column.header }} »</label>
+        <div class="select is-fullwidth"><select id="crm-map-{{ column.index }}" name="map_{{ column.index }}">{% for option in column.options %}<option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></div></div>{% endfor %}</div>
+    </div>
+  </section>
+  {% endif %}
+  {% if rows %}
+  <section class="pd-panel" aria-labelledby="crm-import-rows">
+    <header><h2 id="crm-import-rows">{% translate "crm_ui.import.rows" %}</h2><span class="pd-muted" role="status">{{ summary }}</span></header>
+    <div class="pd-scroll"><table class="table is-fullwidth is-narrow crm-preview" data-crm-preview-table>
+      <caption class="is-sr-only">{% translate "crm_ui.import.rows" %}</caption>
+      <thead><tr><th scope="col">{% translate "crm_ui.import.line" %}</th><th scope="col">{% translate "crm_ui.import.state" %}</th>{% for header in mapped_headers %}<th scope="col">{{ header.label }}</th>{% endfor %}<th scope="col">{% translate "crm_ui.import.note" %}</th></tr></thead>
+      <tbody>{% for row in rows %}<tr class="{% if row.state == 'skip' %}crm-row-skip{% elsif row.state == 'error' %}crm-row-error{% endif %}" data-crm-line="{{ row.line }}" data-crm-state="{{ row.state }}"><td class="pd-mono">{{ row.line }}</td><td><span class="tag is-light">{{ row.state_tag }}</span></td>{% for cell in row.cells %}<td>{{ cell.value }}</td>{% endfor %}<td>{% if row.note %}{{ row.note }}{% endif %}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% if truncated %}<div class="pd-body"><p class="help">{{ truncated }}</p></div>{% endif %}
+  </section>
+  {% endif %}
+  <div class="pd-form-actions">
+    <button class="button pd-touch" type="submit" name="step" value="preview">{% include "ui/_icon.html" with name="refresh-cw" %}<span>{% translate "crm_ui.import.refresh" %}</span></button>
+    {% if importable %}<button class="button is-primary pd-touch" type="submit" name="step" value="import">{% include "ui/_icon.html" with name="check" %}<span>{{ importable }}</span></button>{% endif %}
+    <a href="{% url 'crm:import' %}">{% translate "ui.forms.cancel" %}</a>
+  </div>
+</form>
+{% endif %}
+{% if step == "report" %}
+<section class="pd-panel" aria-labelledby="crm-import-report">
+  <header><h2 id="crm-import-report">{% translate "crm_ui.import.report_title" %}</h2></header>
+  <div class="pd-body">
+    <p role="status" data-crm-report>{{ report }}</p>
+    {% if skipped %}<h3 class="mt-3 has-text-weight-semibold">{% translate "crm_ui.import.skipped" %}</h3><ul class="pd-list">{% for row in skipped %}<li><span class="pd-mono">{% translate "crm_ui.import.line" %} {{ row.line }}</span> — {{ row.reason }}</li>{% endfor %}</ul>{% endif %}
+    <p class="mt-3"><a class="button pd-touch" href="{% url 'crm:organizations' %}">{% translate "crm.menu.crm_organizations" %}</a> <a class="button pd-touch" href="{% url 'crm:contacts' %}">{% translate "crm.menu.crm_contacts" %}</a> <a class="button pd-touch" href="{% url 'crm:import' %}">{% translate "crm_ui.import.again" %}</a></p>
+  </div>
+</section>
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,182 @@
+= partiduo-crm — état, décisions, blocages
+:toc: left
+:toc-title: Table des matières
+:icons: font
+
+État au 28 septembre 2026. Spécification : ADR-009 (D1 à D8).
+
+== Ce qui existe
+
+[cols="1,3",options="header"]
+|===
+|ADR-009 |Réalisation
+|D1 |Extension `CRM`, `depends_on "INVOICING"`, activable par dossier ; désactivée, ses tables restent et ses écrans répondent 404.
+|D2 |Organisations (prospect ou client rattaché à une fiche), contacts, « Devenir client » par `Partiduo::Api::Cards`, abonnement `card.saved`, consentement (origine, base légale datée, opposition datée), effacement.
+|D3 |Opportunités, étapes paramétrables avec valeurs initiales, « Gagnée » et « Perdue » fixes (motif obligatoire), pipeline en colonnes (boutons, glisser-déposer, Maj+flèches, HTMX), liste filtrable, montants pondérés, historique des étapes en ajout seul.
+|D4 |Activités (appel, rendez-vous, courriel, tâche, note), « Mes activités » (en retard, aujourd'hui, à venir), « sans suite prévue ».
+|D5 |« Créer un devis » (`Partiduo::Api::Invoicing.create_document`), plusieurs devis par opportunité, passage à « Proposition » ; événement du cœur `quote.decided` (partiduo-app, D-INV-018) : accepté → « Gagnée », refusé → activité « relancer » ; `invoice.issued` rattache la facture.
+|D6 |Tableau de bord commercial ; tuile « Commercial » sur le tableau de bord du dossier (B-CRM-001) ; entrée « Relation client » au menu ; compteur « Mes activités » et ligne « À traiter ».
+|D7 |`crm.read`, `crm.write`, `crm.admin` ; permissions du cœur exigées en plus pour le devis et la fiche client.
+|D8 |Import CSV (aperçu, correspondance, doublons), export CSV des listes et des contacts pour une action commerciale ; pas d'envoi groupé.
+|===
+
+Interface : `ui/bulma/` (tableau de bord, pipeline, opportunités, organisations,
+contacts, « Mes activités », import, paramétrage), i18n fr, en, nl complète.
+Démonstration : `scripts/demo.cr` (voir le README).
+
+== Décisions
+
+=== D-CRM-001 — Organisations et contacts propres au CRM
+
+Tables `crm_organization` et `crm_contact`, distinctes des fiches du cœur :
+un prospect n'a pas de fiche (ADR-009 Contexte). La nature d'une
+organisation reprend celles d'un client du cœur (`business`, `individual`,
+`public`), transmise à la fiche lors de « Devenir client ». Pour un client, la
+fiche fait foi : `card.saved` recopie nom, SIREN, TVA, courriel, téléphone,
+adresse et nature sur l'organisation.
+
+=== D-CRM-002 — Événement `quote.decided`
+
+Ajouté au cœur (commit séparé de partiduo-app, DECISIONS D-INV-018) : clés
+`quote_id`, `decision`, `customer_card_id`, et `number`. Publié dans la
+transaction de `decide_quote`, non journalisé (pas de rejeu à l'activation).
+
+=== D-CRM-003 — Pas de clé étrangère vers les fiches ni vers la Facturation
+
+`card_id` et `document_id` sont des identifiants relus par le contrat, sans
+clé étrangère : la suppression d'une fiche inutilisée ou d'un brouillon de
+devis relève du cœur et ne doit pas échouer à cause du CRM (même règle que
+D-DOC-002). Les liens internes (`crm_*`) et vers `auth_user` ont leurs clés
+étrangères ; contraintes de domaine en base (natures, bases légales,
+probabilités, une seule étape « Gagnée » et « Perdue », historique en ajout
+seul par déclencheur).
+
+=== D-CRM-004 — Permissions du cœur exigées en plus
+
+« Devenir client » écrit une fiche avec l'acteur : il faut `cards.card.write`.
+« Créer un devis » exige `invoicing.invoice.write` (ADR-009 D7) et, pour un
+prospect, `cards.card.write` ; l'écran ne propose l'action que si ces droits
+sont réunis.
+
+=== D-CRM-005 — Pas d'organisation en double pendant « Devenir client »
+
+`create_card` publie `card.saved` avant que l'organisation ne soit
+rattachée : l'organisation en cours de conversion est notée par fibre
+(`Crm::Conversion.converting`) et l'abonné la rattache au lieu d'en créer
+une autre.
+
+=== D-CRM-006 — Responsables
+
+Les responsables sont les utilisateurs du dossier, lus par
+`Partiduo::Api::Auth.users` avec l'acteur système (le contrat réserve cette
+lecture à `auth.users.manage`) et exposés par `Crm::Api.owners` (identifiant
+et nom seulement) à qui peut lire le CRM.
+
+=== D-CRM-007 — Activité « relancer »
+
+Au refus d'un devis lié, tâche « Relancer : devis <numéro> refusé » pour le
+responsable de l'opportunité, échéance à J+3 (`Api::FOLLOW_UP_DAYS`),
+rattachée à l'opportunité, son organisation et son contact ; objet écrit dans
+la langue de la requête. Rien n'est créé pour une opportunité déjà close.
+
+=== D-CRM-008 — Valeurs initiales
+
+Posées par la migration 0001 (étapes, motifs de perte, origines ; libellés
+traduits tant que `name` est vide). `Crm::Defaults.ensure!` les remet dans
+une table vide : chargeur de données initiales (`InitialData`, instance
+provisionnée avec l'extension active) et specs, qui vident les tables entre
+les exemples. Une spec vérifie que la migration et `Crm::Defaults` posent les
+mêmes valeurs.
+
+=== D-CRM-009 — Chiffre d'affaires facturé
+
+Somme HT des factures et factures d'acompte rattachées aux opportunités,
+émises sur la période, relues une à une par `Partiduo::Api::Invoicing.document`
+(jamais recopiées) ; `nil` sans droit de lecture de la Facturation. Les avoirs
+ne sont pas déduits dans cette version.
+
+=== D-CRM-010 — « Sans suite prévue »
+
+Opportunité ouverte sans activité *à faire* d'échéance aujourd'hui ou plus
+tard ; une activité en retard ne compte pas comme une suite prévue.
+
+=== D-CRM-011 — Contact opposé
+
+Il sort de la liste des contacts (onglet « Opposés à la prospection »), de
+l'export pour une action commerciale et de « Mes activités » ; il ne peut plus
+être choisi pour une nouvelle opportunité ou activité. Une opportunité qui le
+portait déjà le garde. Lever l'opposition (`crm.admin`) efface aussi la base
+légale, à rétablir.
+
+=== D-CRM-012 — Effacement RGPD
+
+Possible si le contact n'est le contact principal d'aucune opportunité qui
+porte un devis. Ses activités propres (sans organisation ni opportunité) sont
+effacées ; les autres activités et les opportunités le perdent comme contact.
+
+=== D-CRM-013 — Pipeline : HTMX d'abord, sans Opal
+
+Chaque carte porte ses boutons « ← » et « → » (formulaires ordinaires,
+utilisables sans JavaScript, au clavier et au toucher) et « Autre étape… » ;
+HTMX remplace le seul tableau et la région d'état annonce le déplacement.
+`crm/js/pipeline.js` (une centaine de lignes) ajoute le glisser-déposer et
+Maj+← / Maj+→ sur la carte qui a le focus (raccourcis actifs seulement sur la
+carte, WCAG 2.1.4). Opal n'a pas été nécessaire. « Perdue » passe toujours par
+l'écran « Changer d'étape » (motif). Colonnes : étapes actives, « Gagnée » et
+« Perdue » limitées aux 30 derniers jours.
+
+=== D-CRM-014 — Import CSV
+
+Séparateur reconnu sur la première ligne ; en-têtes reconnus en fr, en, nl ;
+correspondance ajustable ; 5 000 lignes et 2 Mo au plus, UTF-8. Doublons
+(SIREN, nom d'organisation, courriel, prénom et nom) signalés à l'aperçu et
+*écartés* à l'import ; plusieurs lignes d'une même organisation du fichier
+n'en créent qu'une. Base légale et origine par défaut applicables aux
+contacts importés.
+
+=== D-CRM-015 — Menu
+
+Rubrique de premier niveau « Relation client » (ordre 22, entre Facturation
+et Suivi), paramètres sous « Paramètres » (ordre 96). Le tableau de bord
+commercial est servi sous `/ext/CRM/dashboard` (`/ext/CRM/` y renvoie), sans
+quoi la coquille, qui compare les préfixes, le marquerait actif partout.
+
+=== D-CRM-016 — Écrans génériques de l'interface
+
+Listes, formulaires et consultations réutilisent `PartiduoUi::ReferenceHandler`
+et les gabarits `ui/reference/*.html` (tri, filtres HTMX, pages, export CSV,
+erreurs reliées aux champs) ; gabarits propres pour le pipeline, les tableaux
+de bord, « Mes activités », l'import et le paramétrage.
+
+== Blocages
+
+=== B-CRM-001 — Pas de point d'accroche pour une tuile de tableau de bord
+
+`partiduo-ui-bulma` n'offre aux extensions qu'un compteur de menu et une ligne
+de « À traiter » (`PartiduoUi::Extensions.counter`). *Contournement* :
+`ui/bulma/dashboard_tile.cr` complète `PartiduoUi::Dashboard#build`
+(`previous_def`) pour ajouter la tuile « Commercial », sans modifier le dépôt
+d'interface. À remplacer par un `PartiduoUi::Extensions.tile` quand il
+existera. Les tableaux de bord simplifiés (micro-entreprise, profession
+libérale) n'ont pas la tuile.
+
+=== B-CRM-002 — Planche d'icônes restreinte
+
+La planche Lucide de l'interface n'a ni `kanban`, ni `phone`, ni `mail`, ni
+flèches : icônes génériques (`layout-dashboard`, `calendar`, `user`,
+`send`…) et flèches en caractères dans le pipeline. À enrichir dans
+`partiduo-ui-bulma`.
+
+=== B-CRM-003 — CI non exécutée
+
+Le dépôt n'a pas de dépôt distant (aucune publication demandée) : la CI
+(`.github/workflows/ci.yml`, copie de celle de partiduo-document) n'a pas
+tourné ; format, Ameba et specs passent en local.
+
+== Specs du dernier passage
+
+`crystal spec --order random --no-debug` : *70 exemples, 0 échec* (règles,
+contrat, événements, droits, RGPD, import CSV, migration, conventions,
+écrans avec le client de test). Ameba : aucune remarque. Côté cœur :
+specs Facturation, modules, cartes et architecture de partiduo-app vertes
+(195 + 57 exemples) après l'ajout de `quote.decided`.

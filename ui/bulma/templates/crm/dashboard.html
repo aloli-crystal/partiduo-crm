@@ -1,0 +1,43 @@
+{# SPDX-License-Identifier: AGPL-3.0-or-later. Tableau de bord commercial (ADR-009 D6) : tuiles (pipeline pondéré, gagnées, perdues, taux de transformation, chiffre d'affaires facturé issu des opportunités, activités en retard, opportunités sans suite prévue), pipeline pondéré par étape et par responsable, motifs de perte, sur une période choisie. #}{% extend "ui/base.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block scripts %}<link rel="stylesheet" href="{% asset 'crm/css/crm.css' %}">{% endblock scripts %}
+{% block crumbs %}{% include "ui/_crumbs.html" %}{% endblock crumbs %}
+{% block heading %}{{ title }} <span class="pd-ext">CRM</span>{% endblock heading %}
+{% block actions %}{% for action in actions %}{% include "ui/_action.html" %}{% endfor %}{% endblock actions %}
+{% block content %}
+<form method="get" action="{% url 'crm:dashboard' %}" class="crm-inline mb-3" aria-label="{% translate 'crm_ui.dashboard.period' %}">
+  <label class="label" for="crm-from">{% translate "crm_ui.dashboard.from" %}</label>
+  <input class="input" type="date" id="crm-from" name="from" value="{{ from }}">
+  <label class="label" for="crm-to">{% translate "crm_ui.dashboard.to" %}</label>
+  <input class="input" type="date" id="crm-to" name="to" value="{{ to }}">
+  <button class="button pd-touch" type="submit">{% translate "ui.shell.apply" %}</button>
+</form>
+<p class="pd-muted mb-3">{% translate "crm_ui.dashboard.period_label" %} {{ period }}</p>
+<div class="pd-tiles" data-crm-tiles>
+  {% for tile in tiles %}{% if tile.url %}<a class="pd-panel pd-tile" href="{{ tile.url }}">{% else %}<div class="pd-panel pd-tile">{% endif %}
+    <span class="lbl">{{ tile.label }}</span>
+    <span class="val">{{ tile.value }}</span>
+    {% if tile.sub %}<span class="sub">{% if tile.alert %}<span class="tag is-warning is-light">{{ tile.sub }}</span>{% else %}{{ tile.sub }}{% endif %}</span>{% endif %}
+  {% if tile.url %}</a>{% else %}</div>{% endif %}{% endfor %}
+</div>
+<div class="pd-grid2">
+  <section class="pd-panel" aria-labelledby="crm-by-stage">
+    <header><h2 id="crm-by-stage">{% translate "crm_ui.dashboard.by_stage" %}</h2></header>
+    <div class="pd-body">{% if stages %}<ul class="crm-bars">{% for row in stages %}<li class="crm-bar"><span>{{ row.label }} <span class="pd-muted">({{ row.count }})</span></span><progress class="progress is-primary is-small mb-0" max="100" value="{{ row.width }}" aria-label="{{ row.label }}">{{ row.width }} %</progress><span class="crm-bar-value">{{ row.weighted }}</span></li>{% endfor %}</ul>{% else %}<p class="pd-muted">{% translate "crm_ui.dashboard.empty" %}</p>{% endif %}</div>
+  </section>
+  <section class="pd-panel" aria-labelledby="crm-reasons">
+    <header><h2 id="crm-reasons">{% translate "crm_ui.dashboard.loss_reasons" %}</h2></header>
+    <div class="pd-body">{% if reasons %}<dl class="pd-dl">{% for row in reasons %}<dt>{{ row.label }}</dt><dd class="pd-mono">{{ row.count }}</dd>{% endfor %}</dl>{% else %}<p class="pd-muted">{% translate "crm_ui.dashboard.no_loss" %}</p>{% endif %}</div>
+  </section>
+</div>
+<section class="pd-panel mt-4" aria-labelledby="crm-by-owner">
+  <header><h2 id="crm-by-owner">{% translate "crm_ui.dashboard.by_owner" %}</h2></header>
+  {% if owners %}
+  <div class="pd-scroll"><table class="table is-fullwidth is-narrow" data-crm-owners>
+    <caption class="is-sr-only">{% translate "crm_ui.dashboard.by_owner" %}</caption>
+    <thead><tr><th scope="col">{% translate "crm_ui.opportunities.owner" %}</th><th scope="col" class="amount">{% translate "crm_ui.dashboard.open" %}</th><th scope="col" class="amount pd-hide-s">{% translate "crm_ui.opportunities.amount" %}</th><th scope="col" class="amount">{% translate "crm_ui.opportunities.weighted" %}</th></tr></thead>
+    <tbody>{% for row in owners %}<tr><td>{{ row.label }}</td><td class="amount">{{ row.count }}</td><td class="amount pd-hide-s">{{ row.amount }}</td><td class="amount">{{ row.weighted }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<div class="pd-body"><p class="pd-muted">{% translate "crm_ui.dashboard.empty" %}</p></div>{% endif %}
+</section>
+{% endblock content %}

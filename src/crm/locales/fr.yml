@@ -1,0 +1,250 @@
+fr:
+  crm:
+    module:
+      name: "Relation client"
+    permissions:
+      read: "Consulter la relation client"
+      write: "Saisir organisations, contacts, opportunités et activités"
+      admin: "Paramétrer la relation client (étapes, motifs, origines) et effacer un contact (RGPD)"
+    menu:
+      crm: "Relation client"
+      crm_dashboard: "Tableau de bord commercial"
+      crm_pipeline: "Pipeline"
+      crm_opportunities: "Opportunités"
+      crm_activities: "Mes activités"
+      crm_organizations: "Organisations"
+      crm_contacts: "Contacts"
+      crm_import: "Import CSV"
+      crm_settings: "Relation client"
+    stages:
+      discovery: "Découverte"
+      qualification: "Qualification"
+      proposal: "Proposition"
+      negotiation: "Négociation"
+      won: "Gagnée"
+      lost: "Perdue"
+    loss_reasons:
+      price: "Prix"
+      competitor: "Concurrent retenu"
+      no_budget: "Pas de budget"
+      no_decision: "Pas de décision"
+      timing: "Calendrier"
+      other: "Autre"
+    sources:
+      fair: "Salon"
+      website: "Site internet"
+      referral: "Recommandation"
+      prospecting: "Prospection"
+      network: "Réseau"
+      other: "Autre"
+    natures:
+      business: "Entreprise"
+      individual: "Particulier"
+      public: "Administration publique"
+    civilities:
+      mr: "M."
+      ms: "Mme"
+      mx: "Mx"
+    legal_bases:
+      legitimate_interest: "Intérêt légitime"
+      consent: "Consentement"
+      contract: "Contrat ou démarche du contact"
+    activity_kinds:
+      call: "Appel"
+      meeting: "Rendez-vous"
+      email: "Courriel"
+      task: "Tâche"
+      note: "Note"
+    organization_statuses:
+      prospect: "Prospect"
+      customer: "Client"
+    opportunity_statuses:
+      open: "Ouverte"
+      won: "Gagnée"
+      lost: "Perdue"
+    history:
+      created: "Création"
+      quote_created: "Devis créé"
+      quote_accepted: "Devis accepté"
+    activities:
+      follow_up: "Relancer : devis %{number} refusé"
+    dashboard:
+      no_owner: "Sans responsable"
+    import:
+      fields:
+        organization_name: "Organisation"
+        organization_nature: "Nature de l'organisation"
+        organization_siren: "SIREN"
+        organization_vat_number: "Numéro de TVA"
+        organization_email: "Courriel de l'organisation"
+        organization_phone: "Téléphone de l'organisation"
+        organization_website: "Site internet"
+        organization_line1: "Adresse"
+        organization_postcode: "Code postal"
+        organization_city: "Ville"
+        organization_country: "Pays"
+        contact_civility: "Civilité"
+        contact_first_name: "Prénom"
+        contact_last_name: "Nom"
+        contact_job_title: "Fonction"
+        contact_email: "Courriel"
+        contact_phone: "Téléphone"
+        contact_mobile: "Mobile"
+        source: "Origine"
+        legal_basis: "Base légale"
+        notes: "Notes"
+      duplicates:
+        siren: "Doublon : même SIREN que « %{name} »"
+        organization_name: "Doublon : organisation « %{name} » déjà suivie"
+        contact_email: "Doublon : courriel déjà connu (%{name})"
+        contact_name: "Doublon : contact « %{name} » déjà suivi"
+        file_email: "Doublon : même courriel qu'à la ligne %{name}"
+    errors:
+      organization:
+        name:
+          blank: "Le nom de l'organisation est obligatoire."
+          too_long: "%{max} caractères au plus."
+        nature:
+          invalid: "« %{value} » n'est pas valable."
+        siren:
+          invalid: "Le SIREN « %{value} » doit compter neuf chiffres."
+        vat_number:
+          too_long: "%{max} caractères au plus."
+        email:
+          too_long: "%{max} caractères au plus."
+          invalid: "« %{value} » n'est pas une adresse de courriel."
+        phone:
+          too_long: "%{max} caractères au plus."
+        website:
+          too_long: "%{max} caractères au plus."
+        line1:
+          too_long: "%{max} caractères au plus."
+        postcode:
+          too_long: "%{max} caractères au plus."
+        city:
+          too_long: "%{max} caractères au plus."
+        country_code:
+          invalid: "« %{value} » n'est pas un code pays à deux lettres."
+        notes:
+          too_long: "%{max} caractères au plus."
+        source_id:
+          unknown: "« %{value} » est inconnu."
+        owner_id:
+          unknown: "Ce responsable n'est pas un utilisateur du dossier."
+        category_id:
+          missing: "Aucune catégorie de fiches clients : créez-en une dans le référentiel."
+          not_customer: "Cette catégorie n'est pas une catégorie de clients."
+        already_customer: "Cette organisation est déjà cliente."
+        in_use: "Cette organisation est cliente ou suivie (contacts, opportunités, activités) : elle ne peut pas être supprimée."
+      contact:
+        organization_id:
+          unknown: "« %{value} » est inconnu."
+        civility:
+          invalid: "« %{value} » n'est pas valable."
+        first_name:
+          too_long: "%{max} caractères au plus."
+        last_name:
+          blank: "Le nom du contact est obligatoire."
+          too_long: "%{max} caractères au plus."
+        job_title:
+          too_long: "%{max} caractères au plus."
+        email:
+          too_long: "%{max} caractères au plus."
+          invalid: "« %{value} » n'est pas une adresse de courriel."
+        phone:
+          too_long: "%{max} caractères au plus."
+        mobile:
+          too_long: "%{max} caractères au plus."
+        source_id:
+          unknown: "« %{value} » est inconnu."
+        legal_basis:
+          invalid: "« %{value} » n'est pas valable."
+        notes:
+          too_long: "%{max} caractères au plus."
+        opposition_note:
+          too_long: "%{max} caractères au plus."
+        already_opposed: "Ce contact s'est déjà opposé à la prospection."
+        not_opposed: "Ce contact ne s'est pas opposé à la prospection."
+        quoted: "Ce contact est lié à un devis : il ne peut pas être effacé."
+      opportunity:
+        title:
+          blank: "L'intitulé est obligatoire."
+          too_long: "%{max} caractères au plus."
+        organization_id:
+          unknown: "Choisissez une organisation."
+        amount:
+          negative: "Le montant ne peut pas être négatif."
+          scale: "Deux décimales au plus."
+        probability:
+          range: "La probabilité va de 0 à 100 %."
+        stage_id:
+          invalid: "Cette étape n'est pas disponible."
+        contact_id:
+          unknown: "« %{value} » est inconnu."
+          opposed: "%{name} s'est opposé(e) à la prospection."
+          other_organization: "Ce contact appartient à une autre organisation."
+        owner_id:
+          unknown: "Ce responsable n'est pas un utilisateur du dossier."
+        source_id:
+          unknown: "« %{value} » est inconnu."
+        loss_reason_id:
+          blank: "Le motif de perte est obligatoire."
+          unknown: "« %{value} » est inconnu."
+        loss_note:
+          too_long: "%{max} caractères au plus."
+        closed: "Cette opportunité est close."
+      activity:
+        kind:
+          invalid: "« %{value} » n'est pas valable."
+        subject:
+          blank: "L'objet est obligatoire."
+          too_long: "%{max} caractères au plus."
+        organization_id:
+          unknown: "« %{value} » est inconnu."
+        opportunity_id:
+          unknown: "« %{value} » est inconnu."
+        contact_id:
+          unknown: "« %{value} » est inconnu."
+          opposed: "%{name} s'est opposé(e) à la prospection."
+          other_organization: "Ce contact appartient à une autre organisation."
+        target:
+          missing: "Rattachez l'activité à une organisation, un contact ou une opportunité."
+        duration_minutes:
+          range: "La durée va de 0 à 14 400 minutes."
+        owner_id:
+          unknown: "Ce responsable n'est pas un utilisateur du dossier."
+        report:
+          too_long: "%{max} caractères au plus."
+      stage:
+        name:
+          blank: "Le nom de l'étape est obligatoire."
+          too_long: "%{max} caractères au plus."
+        probability:
+          range: "La probabilité va de 0 à 100 %."
+        position:
+          range: "L'ordre va de 0 à 999."
+        active:
+          in_use: "Des opportunités sont à cette étape : déplacez-les avant de la désactiver."
+          last: "Il faut au moins une étape de travail active."
+      loss_reason:
+        name:
+          blank: "Le libellé est obligatoire."
+          too_long: "%{max} caractères au plus."
+        position:
+          range: "L'ordre va de 0 à 999."
+      source:
+        name:
+          blank: "Le libellé est obligatoire."
+          too_long: "%{max} caractères au plus."
+        position:
+          range: "L'ordre va de 0 à 999."
+      import:
+        content:
+          empty: "Le fichier ne contient ni en-tête ni ligne à importer."
+          too_many: "%{max} lignes au plus par import."
+        mapping:
+          invalid: "Champ inconnu : « %{value} »."
+          twice: "Le champ « %{value} » est choisi pour deux colonnes."
+          name_missing: "Associez une colonne au nom de l'organisation ou au nom du contact."
+        row:
+          empty: "Ligne sans nom d'organisation ni de contact."

@@ -1,0 +1,57 @@
+{# SPDX-License-Identifier: AGPL-3.0-or-later. Pipeline des opportunités (ADR-009 D3) : une colonne par étape active (étapes de travail, puis « Gagnée » et « Perdue » des 30 derniers jours), montant et montant pondéré par colonne. Chaque carte se déplace par ses boutons « ← » et « → » (formulaires ordinaires, sans JavaScript, au clavier et au toucher), par « Autre étape… » (toute étape, motif pour « Perdue »), à la souris par glisser-déposer et au clavier par Maj+← / Maj+→ sur la carte qui a le focus (crm/js/pipeline.js). HTMX ne remplace que #crm-board ; la région d'état annonce le déplacement. #}{% extend "ui/base.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block scripts %}<link rel="stylesheet" href="{% asset 'crm/css/crm.css' %}"><script src="{% asset 'crm/js/pipeline.js' %}" defer></script>{% endblock scripts %}
+{% block crumbs %}{% include "ui/_crumbs.html" %}{% endblock crumbs %}
+{% block heading %}{{ title }} <span class="pd-ext">CRM</span>{% endblock heading %}
+{% block actions %}{% for action in actions %}{% include "ui/_action.html" %}{% endfor %}{% endblock actions %}
+{% block content %}
+<div class="crm-pipeline-head">
+  <form method="get" action="{% url 'crm:pipeline' %}" class="crm-inline" role="search" aria-label="{% translate 'crm_ui.pipeline.filter' %}">
+    <label class="label" for="crm-owner">{% translate "crm_ui.opportunities.owner" %}</label>
+    <div class="select"><select id="crm-owner" name="owner">{% for option in owners %}<option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></div>
+    <button class="button pd-touch" type="submit">{% translate "ui.table.filter" %}</button>
+  </form>
+</div>
+<p class="help mb-3" id="crm-pipeline-help">{% if can_write %}{% translate "crm_ui.pipeline.help" %}{% else %}{% translate "crm_ui.pipeline.help_read" %}{% endif %}</p>
+<div id="crm-board" class="crm-board" data-crm-board>
+  <p class="is-sr-only" role="status" aria-live="polite" id="crm-board-status" data-crm-status>{% if announce %}{{ announce }}{% endif %}</p>
+  <p class="crm-total">{% translate "crm_ui.pipeline.weighted_total" %} <strong class="pd-mono" data-crm-weighted>{{ weighted }}</strong></p>
+  <div class="crm-columns">
+    {% for column in columns %}
+    <section class="crm-column crm-column-{{ column.kind }}" aria-labelledby="crm-col-{{ column.id }}" data-crm-stage="{{ column.id }}" data-crm-kind="{{ column.kind }}">
+      <header class="crm-column-head">
+        <h2 id="crm-col-{{ column.id }}">{{ column.label }} <span class="tag is-light" aria-hidden="true">{{ column.count }}</span><span class="is-sr-only">{{ column.count_label }}</span></h2>
+        <p class="crm-column-sum"><span class="pd-mono">{{ column.amount }}</span>{% if not column.closing %} · <span class="pd-muted">{% translate "crm_ui.pipeline.weighted" %}</span> <span class="pd-mono">{{ column.weighted }}</span>{% endif %}</p>
+      </header>
+      {% if column.cards %}
+      <ol class="crm-cards">
+        {% for card in column.cards %}
+        <li>
+          <article class="crm-card{% if card.no_next_step %} crm-card-alert{% endif %}" id="crm-card-{{ card.id }}" tabindex="0" data-crm-card="{{ card.id }}"{% if can_write %} draggable="true"{% endif %} aria-labelledby="crm-card-{{ card.id }}-title" aria-describedby="crm-pipeline-help">
+            <h3 id="crm-card-{{ card.id }}-title"><a href="{{ card.url }}">{{ card.title }}</a></h3>
+            <p class="crm-card-org">{{ card.organization }}{% if card.customer %} <span class="tag is-success is-light">{% translate "crm.organization_statuses.customer" %}</span>{% endif %}</p>
+            <p class="crm-card-figures"><span class="pd-mono">{{ card.amount }}</span> · <span class="pd-mono">{{ card.probability }}</span></p>
+            <p class="crm-card-meta">{% if card.close_on %}{% include "ui/_icon.html" with name="calendar" %}<span>{{ card.close_on }}</span>{% endif %}{% if card.owner %}{% include "ui/_icon.html" with name="user" %}<span>{{ card.owner }}</span>{% endif %}</p>
+            {% if card.no_next_step %}<p><span class="tag is-warning is-light">{% translate "crm_ui.opportunities.no_next_step" %}</span></p>{% endif %}
+            {% if can_write %}
+            <form method="post" action="{{ card.move_url }}" class="crm-card-move" hx-post="{{ card.move_url }}" hx-target="#crm-board" hx-select="#crm-board" hx-swap="outerHTML" data-crm-move>
+              {% csrf_input %}
+              <input type="hidden" name="from" value="pipeline">
+              <input type="hidden" name="owner" value="{{ owner }}">
+              {% if card.prev_id %}<button class="button is-small pd-touch" type="submit" name="stage_id" value="{{ card.prev_id }}" data-crm-prev title="{% translate 'crm_ui.pipeline.move_to' stage: card.prev_label %}"><span aria-hidden="true">←</span><span class="is-sr-only">{% translate "crm_ui.pipeline.move_to" stage: card.prev_label %}</span></button>{% endif %}
+              {% if card.next_id %}<button class="button is-small pd-touch" type="submit" name="stage_id" value="{{ card.next_id }}" data-crm-next title="{% translate 'crm_ui.pipeline.move_to' stage: card.next_label %}"><span aria-hidden="true">→</span><span class="is-sr-only">{% translate "crm_ui.pipeline.move_to" stage: card.next_label %}</span></button>{% endif %}
+              <a class="button is-small pd-touch" href="{{ card.move_url }}" data-crm-other>{% translate "crm_ui.pipeline.other_stage" %}</a>
+            </form>
+            {% endif %}
+          </article>
+        </li>
+        {% endfor %}
+      </ol>
+      {% else %}
+      <p class="pd-muted crm-empty">{% translate "crm_ui.pipeline.empty" %}</p>
+      {% endif %}
+    </section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

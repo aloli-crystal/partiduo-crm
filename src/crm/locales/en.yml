@@ -1,0 +1,250 @@
+en:
+  crm:
+    module:
+      name: "Customer relations"
+    permissions:
+      read: "View customer relations"
+      write: "Record organisations, contacts, opportunities and activities"
+      admin: "Configure customer relations (stages, reasons, sources) and erase a contact (GDPR)"
+    menu:
+      crm: "Customer relations"
+      crm_dashboard: "Sales dashboard"
+      crm_pipeline: "Pipeline"
+      crm_opportunities: "Opportunities"
+      crm_activities: "My activities"
+      crm_organizations: "Organisations"
+      crm_contacts: "Contacts"
+      crm_import: "CSV import"
+      crm_settings: "Customer relations"
+    stages:
+      discovery: "Discovery"
+      qualification: "Qualification"
+      proposal: "Proposal"
+      negotiation: "Negotiation"
+      won: "Won"
+      lost: "Lost"
+    loss_reasons:
+      price: "Price"
+      competitor: "Competitor chosen"
+      no_budget: "No budget"
+      no_decision: "No decision"
+      timing: "Timing"
+      other: "Other"
+    sources:
+      fair: "Trade fair"
+      website: "Website"
+      referral: "Referral"
+      prospecting: "Prospecting"
+      network: "Network"
+      other: "Other"
+    natures:
+      business: "Business"
+      individual: "Individual"
+      public: "Public body"
+    civilities:
+      mr: "Mr"
+      ms: "Ms"
+      mx: "Mx"
+    legal_bases:
+      legitimate_interest: "Legitimate interest"
+      consent: "Consent"
+      contract: "Contract or contact's request"
+    activity_kinds:
+      call: "Call"
+      meeting: "Meeting"
+      email: "Email"
+      task: "Task"
+      note: "Note"
+    organization_statuses:
+      prospect: "Prospect"
+      customer: "Customer"
+    opportunity_statuses:
+      open: "Open"
+      won: "Won"
+      lost: "Lost"
+    history:
+      created: "Created"
+      quote_created: "Quote created"
+      quote_accepted: "Quote accepted"
+    activities:
+      follow_up: "Follow up: quote %{number} refused"
+    dashboard:
+      no_owner: "No owner"
+    import:
+      fields:
+        organization_name: "Organisation"
+        organization_nature: "Organisation type"
+        organization_siren: "SIREN"
+        organization_vat_number: "VAT number"
+        organization_email: "Organisation email"
+        organization_phone: "Organisation phone"
+        organization_website: "Website"
+        organization_line1: "Address"
+        organization_postcode: "Postcode"
+        organization_city: "City"
+        organization_country: "Country"
+        contact_civility: "Title"
+        contact_first_name: "First name"
+        contact_last_name: "Last name"
+        contact_job_title: "Job title"
+        contact_email: "Email"
+        contact_phone: "Phone"
+        contact_mobile: "Mobile"
+        source: "Source"
+        legal_basis: "Legal basis"
+        notes: "Notes"
+      duplicates:
+        siren: "Duplicate: same SIREN as “%{name}”"
+        organization_name: "Duplicate: organisation “%{name}” already recorded"
+        contact_email: "Duplicate: email already known (%{name})"
+        contact_name: "Duplicate: contact “%{name}” already recorded"
+        file_email: "Duplicate: same email as line %{name}"
+    errors:
+      organization:
+        name:
+          blank: "The organisation name is required."
+          too_long: "At most %{max} characters."
+        nature:
+          invalid: "“%{value}” is not valid."
+        siren:
+          invalid: "SIREN “%{value}” must have nine digits."
+        vat_number:
+          too_long: "At most %{max} characters."
+        email:
+          too_long: "At most %{max} characters."
+          invalid: "“%{value}” is not an email address."
+        phone:
+          too_long: "At most %{max} characters."
+        website:
+          too_long: "At most %{max} characters."
+        line1:
+          too_long: "At most %{max} characters."
+        postcode:
+          too_long: "At most %{max} characters."
+        city:
+          too_long: "At most %{max} characters."
+        country_code:
+          invalid: "“%{value}” is not a two-letter country code."
+        notes:
+          too_long: "At most %{max} characters."
+        source_id:
+          unknown: "“%{value}” is unknown."
+        owner_id:
+          unknown: "This owner is not a user of the company file."
+        category_id:
+          missing: "No customer card category: create one in the reference data."
+          not_customer: "This category is not a customer category."
+        already_customer: "This organisation is already a customer."
+        in_use: "This organisation is a customer or has contacts, opportunities or activities: it cannot be deleted."
+      contact:
+        organization_id:
+          unknown: "“%{value}” is unknown."
+        civility:
+          invalid: "“%{value}” is not valid."
+        first_name:
+          too_long: "At most %{max} characters."
+        last_name:
+          blank: "The contact's last name is required."
+          too_long: "At most %{max} characters."
+        job_title:
+          too_long: "At most %{max} characters."
+        email:
+          too_long: "At most %{max} characters."
+          invalid: "“%{value}” is not an email address."
+        phone:
+          too_long: "At most %{max} characters."
+        mobile:
+          too_long: "At most %{max} characters."
+        source_id:
+          unknown: "“%{value}” is unknown."
+        legal_basis:
+          invalid: "“%{value}” is not valid."
+        notes:
+          too_long: "At most %{max} characters."
+        opposition_note:
+          too_long: "At most %{max} characters."
+        already_opposed: "This contact has already objected to prospecting."
+        not_opposed: "This contact has not objected to prospecting."
+        quoted: "This contact is linked to a quote: it cannot be erased."
+      opportunity:
+        title:
+          blank: "The title is required."
+          too_long: "At most %{max} characters."
+        organization_id:
+          unknown: "Choose an organisation."
+        amount:
+          negative: "The amount cannot be negative."
+          scale: "At most two decimals."
+        probability:
+          range: "Probability ranges from 0 to 100%."
+        stage_id:
+          invalid: "This stage is not available."
+        contact_id:
+          unknown: "“%{value}” is unknown."
+          opposed: "%{name} has objected to prospecting."
+          other_organization: "This contact belongs to another organisation."
+        owner_id:
+          unknown: "This owner is not a user of the company file."
+        source_id:
+          unknown: "“%{value}” is unknown."
+        loss_reason_id:
+          blank: "The loss reason is required."
+          unknown: "“%{value}” is unknown."
+        loss_note:
+          too_long: "At most %{max} characters."
+        closed: "This opportunity is closed."
+      activity:
+        kind:
+          invalid: "“%{value}” is not valid."
+        subject:
+          blank: "The subject is required."
+          too_long: "At most %{max} characters."
+        organization_id:
+          unknown: "“%{value}” is unknown."
+        opportunity_id:
+          unknown: "“%{value}” is unknown."
+        contact_id:
+          unknown: "“%{value}” is unknown."
+          opposed: "%{name} has objected to prospecting."
+          other_organization: "This contact belongs to another organisation."
+        target:
+          missing: "Link the activity to an organisation, a contact or an opportunity."
+        duration_minutes:
+          range: "Duration ranges from 0 to 14,400 minutes."
+        owner_id:
+          unknown: "This owner is not a user of the company file."
+        report:
+          too_long: "At most %{max} characters."
+      stage:
+        name:
+          blank: "The stage name is required."
+          too_long: "At most %{max} characters."
+        probability:
+          range: "Probability ranges from 0 to 100%."
+        position:
+          range: "Order ranges from 0 to 999."
+        active:
+          in_use: "Opportunities are at this stage: move them before deactivating it."
+          last: "At least one active working stage is required."
+      loss_reason:
+        name:
+          blank: "The label is required."
+          too_long: "At most %{max} characters."
+        position:
+          range: "Order ranges from 0 to 999."
+      source:
+        name:
+          blank: "The label is required."
+          too_long: "At most %{max} characters."
+        position:
+          range: "Order ranges from 0 to 999."
+      import:
+        content:
+          empty: "The file has no header or rows to import."
+          too_many: "At most %{max} rows per import."
+        mapping:
+          invalid: "Unknown field: “%{value}”."
+          twice: "Field “%{value}” is chosen for two columns."
+          name_missing: "Map a column to the organisation name or the contact's last name."
+        row:
+          empty: "Row without organisation or contact name."

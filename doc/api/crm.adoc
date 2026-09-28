@@ -1,0 +1,55 @@
+= Contrat `Crm::Api`
+:toc: left
+:toc-title: Table des matières
+
+Contrat public de l'extension CRM (ADR-009), sur le modèle de
+`Partiduo::Api` : acteur en premier argument, contrôle d'accès en première
+ligne (`ModuleDisabled` si l'extension est inactive, `Forbidden` sans la
+permission), vues immuables, écritures par des commandes qui rendent un
+`Partiduo::Api::Result` avec leurs erreurs par champ (`crm.errors.*`), dans
+une transaction.
+
+== Permissions
+
+[cols="1,3",options="header"]
+|===
+|Permission |Commandes et requêtes
+|`crm.read` |lectures, `pipeline`, `dashboard`, `agenda`, `documents`, `export_contacts`
+|`crm.write` |organisations, contacts, opportunités, étapes (`move_opportunity`), activités, opposition, import
+|`crm.admin` |étapes, motifs de perte, origines, `withdraw_opposition`, `erase_contact`, `delete_organization`
+|===
+
+`create_quote` exige en plus `invoicing.invoice.write` (et `cards.card.write`
+pour un prospect) ; `become_customer` exige `cards.card.write`.
+
+== Commandes et requêtes
+
+[cols="2,3",options="header"]
+|===
+|Méthode |Rôle
+|`organizations`, `organization`, `organization_for_card` |lecture (filtres : texte, prospect ou client, responsable)
+|`create_organization`, `update_organization`, `check_organization` |prospect, responsable par défaut : l'acteur
+|`become_customer(actor, id, CustomerInput)` |fiche client créée par `Partiduo::Api::Cards`, rattachée
+|`delete_organization` |prospect sans contact, opportunité ni activité
+|`contacts`, `contact`, `create_contact`, `update_contact` |`ContactQuery#opposed` : `false` (défaut) écarte les opposés
+|`record_opposition`, `withdraw_opposition`, `contact_quoted?`, `erase_contact` |RGPD
+|`opportunities`, `opportunity`, `create_opportunity`, `update_opportunity` |première étape de travail, probabilité de l'étape par défaut
+|`move_opportunity(actor, id, MoveInput)` |changement d'étape historisé ; motif obligatoire pour « Perdue »
+|`stage_history`, `pipeline` |historique ; colonnes par étape
+|`create_quote`, `documents` |devis brouillon lié ; devis et factures relus dans la Facturation
+|`activities`, `activity`, `agenda`, `create_activity`, `update_activity`, `complete_activity`, `delete_activity` |activités
+|`stages`, `loss_reasons`, `sources`, `owners` |paramétrage et responsables
+|`create_stage`, `update_stage`, `create_loss_reason`, `update_loss_reason`, `create_source`, `update_source` |paramétrage
+|`dashboard(actor, from, to)`, `tile`, `due_count` |tableau de bord, tuile, compteur du menu
+|`preview_import`, `import`, `export_contacts` |CSV
+|===
+
+== Événements du cœur reçus
+
+[cols="1,3",options="header"]
+|===
+|Événement |Effet
+|`card.saved` |fiche *client* : organisation créée ou mise à jour depuis la fiche
+|`quote.decided` |devis lié accepté → « Gagnée » (cause `quote_accepted`) ; refusé → tâche « relancer » à J+3 pour le responsable
+|`invoice.issued` |facture tirée (directement ou par une commande) d'un devis lié → rattachée à l'opportunité
+|===

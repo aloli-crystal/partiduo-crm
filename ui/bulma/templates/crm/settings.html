@@ -1,0 +1,15 @@
+{# SPDX-License-Identifier: AGPL-3.0-or-later. Paramétrage de la relation client (ADR-009 D3, D7 : crm.admin) : étapes du pipeline (nom, probabilité par défaut, ordre, active ; « Gagnée » et « Perdue » fixes), motifs de perte, origines. Une ligne par formulaire ; un nom vide garde le libellé traduit d'une valeur initiale ; les erreurs d'une ligne refusée sont reliées à ses champs. #}{% extend "ui/base.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block scripts %}<link rel="stylesheet" href="{% asset 'crm/css/crm.css' %}">{% endblock scripts %}
+{% block crumbs %}{% include "ui/_crumbs.html" %}{% endblock crumbs %}
+{% block heading %}{{ title }} <span class="pd-ext">CRM</span>{% endblock heading %}
+{% block content %}
+{% for panel in panels %}
+<section class="pd-panel" aria-labelledby="crm-settings-{{ panel.kind }}" data-crm-settings="{{ panel.kind }}">
+  <header><h2 id="crm-settings-{{ panel.kind }}">{{ panel.title }}</h2></header>
+  <p class="help px-4 pt-3">{{ panel.help }}</p>
+  {% for row in panel.rows %}{% include "crm/_setting_row.html" %}{% endfor %}
+  {% for row in panel.blank %}<h3 class="is-sr-only" id="crm-{{ row.key }}-title">{% translate "crm_ui.settings.add" %}</h3>{% include "crm/_setting_row.html" %}{% endfor %}
+</section>
+{% endfor %}
+{% endblock content %}

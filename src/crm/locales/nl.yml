@@ -1,0 +1,250 @@
+nl:
+  crm:
+    module:
+      name: "Klantrelaties"
+    permissions:
+      read: "Klantrelaties raadplegen"
+      write: "Organisaties, contactpersonen, kansen en activiteiten invoeren"
+      admin: "Klantrelaties instellen (fasen, redenen, herkomsten) en een contactpersoon wissen (AVG)"
+    menu:
+      crm: "Klantrelaties"
+      crm_dashboard: "Commercieel dashboard"
+      crm_pipeline: "Pijplijn"
+      crm_opportunities: "Verkoopkansen"
+      crm_activities: "Mijn activiteiten"
+      crm_organizations: "Organisaties"
+      crm_contacts: "Contactpersonen"
+      crm_import: "CSV-import"
+      crm_settings: "Klantrelaties"
+    stages:
+      discovery: "Verkenning"
+      qualification: "Kwalificatie"
+      proposal: "Voorstel"
+      negotiation: "Onderhandeling"
+      won: "Gewonnen"
+      lost: "Verloren"
+    loss_reasons:
+      price: "Prijs"
+      competitor: "Concurrent gekozen"
+      no_budget: "Geen budget"
+      no_decision: "Geen beslissing"
+      timing: "Timing"
+      other: "Andere"
+    sources:
+      fair: "Beurs"
+      website: "Website"
+      referral: "Aanbeveling"
+      prospecting: "Prospectie"
+      network: "Netwerk"
+      other: "Andere"
+    natures:
+      business: "Onderneming"
+      individual: "Particulier"
+      public: "Overheid"
+    civilities:
+      mr: "Dhr."
+      ms: "Mevr."
+      mx: "Mx"
+    legal_bases:
+      legitimate_interest: "Gerechtvaardigd belang"
+      consent: "Toestemming"
+      contract: "Overeenkomst of verzoek van de contactpersoon"
+    activity_kinds:
+      call: "Telefoongesprek"
+      meeting: "Afspraak"
+      email: "E-mail"
+      task: "Taak"
+      note: "Notitie"
+    organization_statuses:
+      prospect: "Prospect"
+      customer: "Klant"
+    opportunity_statuses:
+      open: "Open"
+      won: "Gewonnen"
+      lost: "Verloren"
+    history:
+      created: "Aangemaakt"
+      quote_created: "Offerte aangemaakt"
+      quote_accepted: "Offerte aanvaard"
+    activities:
+      follow_up: "Opvolgen: offerte %{number} geweigerd"
+    dashboard:
+      no_owner: "Zonder verantwoordelijke"
+    import:
+      fields:
+        organization_name: "Organisatie"
+        organization_nature: "Aard van de organisatie"
+        organization_siren: "SIREN"
+        organization_vat_number: "Btw-nummer"
+        organization_email: "E-mail van de organisatie"
+        organization_phone: "Telefoon van de organisatie"
+        organization_website: "Website"
+        organization_line1: "Adres"
+        organization_postcode: "Postcode"
+        organization_city: "Gemeente"
+        organization_country: "Land"
+        contact_civility: "Aanspreking"
+        contact_first_name: "Voornaam"
+        contact_last_name: "Naam"
+        contact_job_title: "Functie"
+        contact_email: "E-mail"
+        contact_phone: "Telefoon"
+        contact_mobile: "Gsm"
+        source: "Herkomst"
+        legal_basis: "Rechtsgrond"
+        notes: "Notities"
+      duplicates:
+        siren: "Dubbel: zelfde SIREN als „%{name}”"
+        organization_name: "Dubbel: organisatie „%{name}” bestaat al"
+        contact_email: "Dubbel: e-mail al bekend (%{name})"
+        contact_name: "Dubbel: contactpersoon „%{name}” bestaat al"
+        file_email: "Dubbel: zelfde e-mail als regel %{name}"
+    errors:
+      organization:
+        name:
+          blank: "De naam van de organisatie is verplicht."
+          too_long: "Hoogstens %{max} tekens."
+        nature:
+          invalid: "„%{value}” is ongeldig."
+        siren:
+          invalid: "SIREN „%{value}” moet negen cijfers tellen."
+        vat_number:
+          too_long: "Hoogstens %{max} tekens."
+        email:
+          too_long: "Hoogstens %{max} tekens."
+          invalid: "„%{value}” is geen e-mailadres."
+        phone:
+          too_long: "Hoogstens %{max} tekens."
+        website:
+          too_long: "Hoogstens %{max} tekens."
+        line1:
+          too_long: "Hoogstens %{max} tekens."
+        postcode:
+          too_long: "Hoogstens %{max} tekens."
+        city:
+          too_long: "Hoogstens %{max} tekens."
+        country_code:
+          invalid: "„%{value}” is geen landcode van twee letters."
+        notes:
+          too_long: "Hoogstens %{max} tekens."
+        source_id:
+          unknown: "„%{value}” is onbekend."
+        owner_id:
+          unknown: "Deze verantwoordelijke is geen gebruiker van het dossier."
+        category_id:
+          missing: "Geen categorie klantenfiches: maak er een aan in de referentiegegevens."
+          not_customer: "Deze categorie is geen klantencategorie."
+        already_customer: "Deze organisatie is al klant."
+        in_use: "Deze organisatie is klant of heeft contactpersonen, kansen of activiteiten: ze kan niet worden verwijderd."
+      contact:
+        organization_id:
+          unknown: "„%{value}” is onbekend."
+        civility:
+          invalid: "„%{value}” is ongeldig."
+        first_name:
+          too_long: "Hoogstens %{max} tekens."
+        last_name:
+          blank: "De naam van de contactpersoon is verplicht."
+          too_long: "Hoogstens %{max} tekens."
+        job_title:
+          too_long: "Hoogstens %{max} tekens."
+        email:
+          too_long: "Hoogstens %{max} tekens."
+          invalid: "„%{value}” is geen e-mailadres."
+        phone:
+          too_long: "Hoogstens %{max} tekens."
+        mobile:
+          too_long: "Hoogstens %{max} tekens."
+        source_id:
+          unknown: "„%{value}” is onbekend."
+        legal_basis:
+          invalid: "„%{value}” is ongeldig."
+        notes:
+          too_long: "Hoogstens %{max} tekens."
+        opposition_note:
+          too_long: "Hoogstens %{max} tekens."
+        already_opposed: "Deze contactpersoon heeft al bezwaar gemaakt tegen prospectie."
+        not_opposed: "Deze contactpersoon heeft geen bezwaar gemaakt tegen prospectie."
+        quoted: "Deze contactpersoon is aan een offerte gekoppeld: hij kan niet worden gewist."
+      opportunity:
+        title:
+          blank: "De titel is verplicht."
+          too_long: "Hoogstens %{max} tekens."
+        organization_id:
+          unknown: "Kies een organisatie."
+        amount:
+          negative: "Het bedrag mag niet negatief zijn."
+          scale: "Hoogstens twee decimalen."
+        probability:
+          range: "De kans ligt tussen 0 en 100%."
+        stage_id:
+          invalid: "Deze fase is niet beschikbaar."
+        contact_id:
+          unknown: "„%{value}” is onbekend."
+          opposed: "%{name} heeft bezwaar gemaakt tegen prospectie."
+          other_organization: "Deze contactpersoon hoort bij een andere organisatie."
+        owner_id:
+          unknown: "Deze verantwoordelijke is geen gebruiker van het dossier."
+        source_id:
+          unknown: "„%{value}” is onbekend."
+        loss_reason_id:
+          blank: "De reden van verlies is verplicht."
+          unknown: "„%{value}” is onbekend."
+        loss_note:
+          too_long: "Hoogstens %{max} tekens."
+        closed: "Deze kans is afgesloten."
+      activity:
+        kind:
+          invalid: "„%{value}” is ongeldig."
+        subject:
+          blank: "Het onderwerp is verplicht."
+          too_long: "Hoogstens %{max} tekens."
+        organization_id:
+          unknown: "„%{value}” is onbekend."
+        opportunity_id:
+          unknown: "„%{value}” is onbekend."
+        contact_id:
+          unknown: "„%{value}” is onbekend."
+          opposed: "%{name} heeft bezwaar gemaakt tegen prospectie."
+          other_organization: "Deze contactpersoon hoort bij een andere organisatie."
+        target:
+          missing: "Koppel de activiteit aan een organisatie, contactpersoon of kans."
+        duration_minutes:
+          range: "De duur ligt tussen 0 en 14.400 minuten."
+        owner_id:
+          unknown: "Deze verantwoordelijke is geen gebruiker van het dossier."
+        report:
+          too_long: "Hoogstens %{max} tekens."
+      stage:
+        name:
+          blank: "De naam van de fase is verplicht."
+          too_long: "Hoogstens %{max} tekens."
+        probability:
+          range: "De kans ligt tussen 0 en 100%."
+        position:
+          range: "De volgorde ligt tussen 0 en 999."
+        active:
+          in_use: "Er staan kansen in deze fase: verplaats ze voordat u ze uitschakelt."
+          last: "Er is minstens één actieve werkfase nodig."
+      loss_reason:
+        name:
+          blank: "De omschrijving is verplicht."
+          too_long: "Hoogstens %{max} tekens."
+        position:
+          range: "De volgorde ligt tussen 0 en 999."
+      source:
+        name:
+          blank: "De omschrijving is verplicht."
+          too_long: "Hoogstens %{max} tekens."
+        position:
+          range: "De volgorde ligt tussen 0 en 999."
+      import:
+        content:
+          empty: "Het bestand bevat geen kop of regels om te importeren."
+          too_many: "Hoogstens %{max} regels per import."
+        mapping:
+          invalid: "Onbekend veld: „%{value}”."
+          twice: "Veld „%{value}” is voor twee kolommen gekozen."
+          name_missing: "Koppel een kolom aan de naam van de organisatie of van de contactpersoon."
+        row:
+          empty: "Regel zonder naam van organisatie of contactpersoon."

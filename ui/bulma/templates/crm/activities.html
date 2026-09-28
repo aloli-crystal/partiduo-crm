@@ -1,0 +1,40 @@
+{# SPDX-License-Identifier: AGPL-3.0-or-later. « Mes activités » (ADR-009 D4) : activités à faire du responsable choisi (par défaut, l'utilisateur), en retard, aujourd'hui, à venir ; « Fait » avec compte rendu facultatif, modification. Les activités d'un contact opposé à la prospection n'y figurent plus (ADR-009 D2). #}{% extend "ui/base.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block scripts %}<link rel="stylesheet" href="{% asset 'crm/css/crm.css' %}">{% endblock scripts %}
+{% block crumbs %}{% include "ui/_crumbs.html" %}{% endblock crumbs %}
+{% block heading %}{{ title }} <span class="pd-ext">CRM</span>{% endblock heading %}
+{% block actions %}{% for action in actions %}{% include "ui/_action.html" %}{% endfor %}{% endblock actions %}
+{% block content %}
+<form method="get" action="{% url 'crm:activities' %}" class="crm-inline mb-3" role="search" aria-label="{% translate 'crm_ui.activities.owner_filter' %}">
+  <label class="label" for="crm-activities-owner">{% translate "crm_ui.activities.owner" %}</label>
+  <div class="select"><select id="crm-activities-owner" name="owner">{% for option in owners %}<option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>{% endfor %}</select></div>
+  <button class="button pd-touch" type="submit">{% translate "ui.table.filter" %}</button>
+</form>
+{% for group in groups %}
+<section class="pd-panel" aria-labelledby="crm-group-{{ group.key }}" data-crm-group="{{ group.key }}">
+  <header><h2 id="crm-group-{{ group.key }}">{{ group.label }} <span class="tag is-light">{{ group.count }}</span></h2></header>
+  {% if group.items %}
+  <ul class="crm-agenda">
+    {% for item in group.items %}
+    <li class="{% if item.late %}crm-agenda-late{% endif %}" data-crm-activity="{{ item.id }}">
+      <span class="crm-agenda-when">{% if item.late %}<span class="is-sr-only">{% translate "crm_ui.activities.late" %} </span>{% endif %}{{ item.due_on }}{% if item.starts_at %} · {{ item.starts_at }}{% endif %}</span>
+      <div class="crm-agenda-main">
+        <strong><span class="tag is-light">{{ item.kind }}</span> {{ item.subject }}</strong>
+        <small>{% if item.target %}{% if item.target_url %}<a href="{{ item.target_url }}">{{ item.target }}</a>{% else %}{{ item.target }}{% endif %}{% endif %}{% if item.contact %} · <a href="{{ item.contact_url }}">{{ item.contact }}</a>{% endif %}{% if item.duration %} · {{ item.duration }}{% endif %}</small>
+        {% if item.report %}<small>{{ item.report }}</small>{% endif %}
+      </div>
+      {% if can_write %}
+      <div class="crm-agenda-acts">
+        <form method="post" action="{{ item.done_url }}">{% csrf_input %}<input type="hidden" name="next" value="{{ next }}"><button class="button is-small pd-touch" type="submit">{% include "ui/_icon.html" with name="check" %}<span>{% translate "crm_ui.activities.mark_done" %}<span class="is-sr-only"> : {{ item.subject }}</span></span></button></form>
+        <a class="button is-small pd-touch" href="{{ item.edit_url }}">{% translate "ui.forms.edit" %}<span class="is-sr-only"> : {{ item.subject }}</span></a>
+      </div>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <div class="pd-body"><p class="pd-muted">{% translate "crm_ui.activities.nothing" %}</p></div>
+  {% endif %}
+</section>
+{% endfor %}
+{% endblock content %}
