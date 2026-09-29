@@ -83,7 +83,7 @@ module Crm
         views = Api.opportunities(actor, opportunity_query)
         params = {"q" => query("q"), "stage" => query("stage"), "status" => query("status"), "owner" => query("owner"),
                   "next" => query("next")}.reject { |_, value| value.empty? }
-        actions = [link_action("crm_ui.pipeline.title", Ui.url("pipeline"), "", "layout-dashboard")]
+        actions = [link_action("crm_ui.pipeline.title", Ui.url("pipeline"), "", "kanban")]
         actions << link_action("crm_ui.opportunities.new", Ui.url("opportunity_new"), "primary", "plus") if can_write?
         list_page(I18n.t("crm.menu.crm_opportunities"), table(views, params), crumbs, "crm_ui.opportunities.csv_name", actions,
           filters: filters, intro: I18n.t("crm_ui.opportunities.intro"))
@@ -209,7 +209,7 @@ module Crm
           list << post_action("crm_ui.opportunities.create_quote", Ui.url("opportunity_quote", id: view.id),
             view.organization_customer ? nil : "crm_ui.opportunities.create_quote_confirm", "primary", "file-text")
         end
-        list << link_action("crm_ui.opportunities.move", Ui.url("opportunity_move", id: view.id), "", "send")
+        list << link_action("crm_ui.opportunities.move", Ui.url("opportunity_move", id: view.id), "", "arrow-right")
         list << link_action("crm_ui.activities.new", "#{Ui.url("activity_new")}?opportunity=#{view.id}", "", "calendar")
         list << link_action("ui.forms.edit", Ui.url("opportunity_edit", id: view.id), "", "notebook-pen")
         list

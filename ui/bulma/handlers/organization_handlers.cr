@@ -177,6 +177,8 @@ module Crm
 
       private def actions(view : Api::OrganizationView) : Array(Screen::Action)
         list = [] of Screen::Action
+        Ui.tel(view.phone).try { |url| list << link_action("crm_ui.actions.call", url, "", "phone") }
+        Ui.mailto(view.email).try { |url| list << link_action("crm_ui.actions.write", url, "", "mail") }
         if can_write?
           if view.prospect? && can?(Api::CUSTOMER_PERMISSION)
             list << link_action("crm_ui.organizations.become_customer", Ui.url("organization_customer", id: view.id), "primary", "user")
@@ -201,8 +203,8 @@ module Crm
           Screen::Item.new(I18n.t("crm_ui.organizations.nature"), I18n.t(view.nature_key)),
           Screen::Item.new(I18n.t("crm_ui.organizations.siren"), view.siren, mono: true),
           Screen::Item.new(I18n.t("crm_ui.organizations.vat_number"), view.vat_number, mono: true),
-          Screen::Item.new(I18n.t("crm_ui.organizations.email"), view.email, view.email.empty? ? nil : "mailto:#{view.email}"),
-          Screen::Item.new(I18n.t("crm_ui.organizations.phone"), view.phone, view.phone.empty? ? nil : "tel:#{view.phone.gsub(/\s+/, "")}"),
+          Screen::Item.new(I18n.t("crm_ui.organizations.email"), view.email, Ui.mailto(view.email)),
+          Screen::Item.new(I18n.t("crm_ui.organizations.phone"), view.phone, Ui.tel(view.phone)),
           Screen::Item.new(I18n.t("crm_ui.organizations.website"), view.website),
           Screen::Item.new(I18n.t("crm_ui.organizations.address"), view.address),
           Screen::Item.new(I18n.t("crm_ui.organizations.owner"), view.owner_id.try { |id| owners[id]? } || ""),

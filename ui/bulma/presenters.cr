@@ -40,6 +40,21 @@ module Crm
       value ? "1" : nil
     end
 
+    # Icône de la planche de l'interface pour chaque nature d'activité.
+    KIND_ICONS = {"call" => "phone", "meeting" => "calendar", "email" => "mail", "task" => "check", "note" => "notebook-pen"}
+
+    # Lien `tel:` d'un numéro (espaces, points, tirets et parenthèses
+    # retirés) ; `nil` si le numéro est vide.
+    def self.tel(number : String?) : String?
+      digits = number.to_s.gsub(/[\s.\-()]/, "")
+      digits.empty? ? nil : "tel:#{digits}"
+    end
+
+    # Lien `mailto:` d'une adresse ; `nil` si elle est vide.
+    def self.mailto(email : String?) : String?
+      email.presence.try { |address| "mailto:#{address}" }
+    end
+
     # Classe Bulma d'une étape ou d'un statut d'opportunité.
     def self.status_class(status : String) : String
       case status
@@ -90,6 +105,7 @@ module Crm
           "id"          => view.id.to_s,
           "kind"        => I18n.t(view.kind_key),
           "kind_code"   => view.kind,
+          "kind_icon"   => KIND_ICONS[view.kind]? || "calendar",
           "subject"     => view.subject,
           "due_on"      => fmt.date(view.due_on),
           "starts_at"   => view.starts_at.try(&.to_s("%H:%M")),

@@ -11,6 +11,9 @@ nl:
       late:
         one: "%{count} achterstallige activiteit"
         other: "%{count} achterstallige activiteiten"
+    actions:
+      call: "Bellen"
+      write: "Mailen"
     forms:
       none: "— geen —"
       choose: "— kiezen —"

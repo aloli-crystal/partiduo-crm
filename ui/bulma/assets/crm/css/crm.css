@@ -80,3 +80,7 @@
   .crm-card-move, .crm-agenda-acts { display: none; }
 }
 .crm-settings-row .help.is-danger { grid-column: 1 / -1; margin: 0; }
+
+/* Nature d'une activité : icône de la planche commune, puis libellé. */
+.crm-kind { display: inline-flex; align-items: center; gap: .3rem; }
+.crm-kind .pd-icon { inline-size: .9rem; block-size: .9rem; }

@@ -11,6 +11,9 @@ en:
       late:
         one: "%{count} overdue activity"
         other: "%{count} overdue activities"
+    actions:
+      call: "Call"
+      write: "Email"
     forms:
       none: "— none —"
       choose: "— choose —"

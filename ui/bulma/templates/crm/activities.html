@@ -19,7 +19,7 @@
     <li class="{% if item.late %}crm-agenda-late{% endif %}" data-crm-activity="{{ item.id }}">
       <span class="crm-agenda-when">{% if item.late %}<span class="is-sr-only">{% translate "crm_ui.activities.late" %} </span>{% endif %}{{ item.due_on }}{% if item.starts_at %} · {{ item.starts_at }}{% endif %}</span>
       <div class="crm-agenda-main">
-        <strong><span class="tag is-light">{{ item.kind }}</span> {{ item.subject }}</strong>
+        <strong><span class="tag is-light crm-kind">{% include "ui/_icon.html" with name=item.kind_icon %}<span>{{ item.kind }}</span></span> {{ item.subject }}</strong>
         <small>{% if item.target %}{% if item.target_url %}<a href="{{ item.target_url }}">{{ item.target }}</a>{% else %}{{ item.target }}{% endif %}{% endif %}{% if item.contact %} · <a href="{{ item.contact_url }}">{{ item.contact }}</a>{% endif %}{% if item.duration %} · {{ item.duration }}{% endif %}</small>
         {% if item.report %}<small>{{ item.report }}</small>{% endif %}
       </div>

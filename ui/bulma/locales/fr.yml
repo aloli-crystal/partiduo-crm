@@ -11,6 +11,9 @@ fr:
       late:
         one: "%{count} activité en retard"
         other: "%{count} activités en retard"
+    actions:
+      call: "Appeler"
+      write: "Écrire"
     forms:
       none: "— aucun —"
       choose: "— choisir —"

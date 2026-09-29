@@ -183,6 +183,11 @@ module Crm
 
       private def actions(view : Api::ContactView) : Array(Screen::Action)
         list = [] of Screen::Action
+        # Appeler, écrire : pas pour un contact opposé à la prospection.
+        unless view.opposed?
+          Ui.tel(view.phone.presence || view.mobile).try { |url| list << link_action("crm_ui.actions.call", url, "", "phone") }
+          Ui.mailto(view.email).try { |url| list << link_action("crm_ui.actions.write", url, "", "mail") }
+        end
         if can_write?
           unless view.opposed?
             list << link_action("crm_ui.activities.new", "#{Ui.url("activity_new")}?contact=#{view.id}", "", "calendar")
@@ -210,9 +215,9 @@ module Crm
           Screen::Item.new(I18n.t("crm_ui.contacts.organization"), view.organization_name || "",
             view.organization_id.try { |id| Ui.url("organization", id: id) }),
           Screen::Item.new(I18n.t("crm_ui.contacts.job_title"), view.job_title),
-          Screen::Item.new(I18n.t("crm_ui.contacts.email"), view.email, view.email.empty? ? nil : "mailto:#{view.email}"),
-          Screen::Item.new(I18n.t("crm_ui.contacts.phone"), view.phone),
-          Screen::Item.new(I18n.t("crm_ui.contacts.mobile"), view.mobile),
+          Screen::Item.new(I18n.t("crm_ui.contacts.email"), view.email, Ui.mailto(view.email)),
+          Screen::Item.new(I18n.t("crm_ui.contacts.phone"), view.phone, Ui.tel(view.phone)),
+          Screen::Item.new(I18n.t("crm_ui.contacts.mobile"), view.mobile, Ui.tel(view.mobile)),
           Screen::Item.new(I18n.t("crm_ui.contacts.notes"), view.notes),
         ])
       end

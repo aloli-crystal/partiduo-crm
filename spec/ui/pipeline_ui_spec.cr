@@ -31,6 +31,9 @@ describe "Pipeline sous /ext/CRM/pipeline (ADR-009 D3)" do
     # Déplacement sans JavaScript : boutons de formulaire, libellés pour les lecteurs d'écran.
     html.should contain(%(name="stage_id" value="#{S.stage("qualification").id}" data-crm-next))
     html.should contain("Déplacer vers « Qualification »")
+    # Flèches de la planche d'icônes commune (B-CRM-002 levé).
+    html.should match(/data-crm-next title="[^"]*"><svg class="pd-icon" aria-hidden="true" focusable="false"><use href="[^"]*#arrow-right">/)
+    browser.get("/ext/CRM/opportunities").html.should contain("#kanban")
     html.should contain("crm/js/pipeline.js")
     html.should contain(%(role="status" aria-live="polite" id="crm-board-status"))
     html.should contain("Maj+← et Maj+→")

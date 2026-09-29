@@ -26,7 +26,7 @@ module Crm
         page("crm/dashboard.html", {
           "title"   => I18n.t("crm.menu.crm_dashboard"),
           "crumbs"  => crumbs({I18n.t("crm.menu.crm_dashboard"), nil}),
-          "actions" => [link_action("crm_ui.pipeline.title", Ui.url("pipeline"), "", "layout-dashboard")],
+          "actions" => [link_action("crm_ui.pipeline.title", Ui.url("pipeline"), "", "kanban")],
           "from"    => Ui.iso(from),
           "to"      => Ui.iso(to),
           "period"  => fmt.period(from, to),

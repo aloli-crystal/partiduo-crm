@@ -159,7 +159,7 @@ describe "Écrans de la relation client sous /ext/CRM/ (ADR-009, ADR-005)" do
     organization = S.organization
     created = browser.post("/ext/CRM/contacts/new", {"last_name" => "Leroux", "first_name" => "Paul", "civility" => "mr",
                                                      "organization_id" => organization.id.to_s, "email" => "paul@leroux.test",
-                                                     "legal_basis" => "consent", "legal_basis_on" => "2026-09-01", "source_id" => ""})
+                                                     "phone" => "01 23 45 67 89", "legal_basis" => "consent", "legal_basis_on" => "2026-09-01", "source_id" => ""})
     created.status.should eq(302)
     contact = Api.contacts(S.reader).first
     contact.legal_basis_on.should eq(S.date("2026-09-01"))
@@ -167,11 +167,17 @@ describe "Écrans de la relation client sous /ext/CRM/ (ADR-009, ADR-005)" do
     page.should contain("Consentement (RGPD)")
     page.should contain("Enregistrer l'opposition")
     page.should contain("Effacer (RGPD)")
+    # Appeler, écrire : icônes de la planche commune (B-CRM-002 levé).
+    page.should match(/<a class="[^"]*" href="tel:0123456789"><svg class="pd-icon"[^>]*><use href="[^"]*#phone"><\/use><\/svg>\s*<span>Appeler<\/span><\/a>/)
+    page.should match(/<a class="[^"]*" href="mailto:paul@leroux.test"><svg class="pd-icon"[^>]*><use href="[^"]*#mail"><\/use><\/svg>\s*<span>Écrire<\/span><\/a>/)
 
     export = browser.get("/ext/CRM/contacts/export")
     export.content.should contain("paul@leroux.test")
     browser.post("/ext/CRM/contacts/#{contact.id}/opposition").status.should eq(302)
     browser.get("/ext/CRM/contacts").html.should_not contain("paul@leroux.test")
+    opposed = browser.get("/ext/CRM/contacts/#{contact.id}").html
+    opposed.should_not contain(%(href="tel:0123456789"><svg))
+    opposed.should_not contain("<span>Écrire</span>")
     browser.get("/ext/CRM/contacts?tab=opposed").html.should contain("paul@leroux.test")
     browser.get("/ext/CRM/contacts/export").content.should_not contain("paul@leroux.test")
 
