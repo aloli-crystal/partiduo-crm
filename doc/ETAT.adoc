@@ -3,7 +3,7 @@
 :toc-title: Table des matières
 :icons: font
 
-État au 28 septembre 2026. Spécification : ADR-009 (D1 à D8).
+État au 29 septembre 2026. Spécification : ADR-009 (D1 à D8).
 
 == Ce qui existe
 
@@ -15,7 +15,7 @@
 |D3 |Opportunités, étapes paramétrables avec valeurs initiales, « Gagnée » et « Perdue » fixes (motif obligatoire), pipeline en colonnes (boutons, glisser-déposer, Maj+flèches, HTMX), liste filtrable, montants pondérés, historique des étapes en ajout seul.
 |D4 |Activités (appel, rendez-vous, courriel, tâche, note), « Mes activités » (en retard, aujourd'hui, à venir), « sans suite prévue ».
 |D5 |« Créer un devis » (`Partiduo::Api::Invoicing.create_document`), plusieurs devis par opportunité, passage à « Proposition » ; événement du cœur `quote.decided` (partiduo-app, D-INV-018) : accepté → « Gagnée », refusé → activité « relancer » ; `invoice.issued` rattache la facture.
-|D6 |Tableau de bord commercial ; tuile « Commercial » sur le tableau de bord du dossier (B-CRM-001) ; entrée « Relation client » au menu ; compteur « Mes activités » et ligne « À traiter ».
+|D6 |Tableau de bord commercial ; tuile « Commercial » sur les tableaux de bord du dossier, complet et simplifiés (point d'accroche `PartiduoUi::Extensions.tile`, D-CRM-017) ; entrée « Relation client » au menu ; compteur « Mes activités » et ligne « À traiter ».
 |D7 |`crm.read`, `crm.write`, `crm.admin` ; permissions du cœur exigées en plus pour le devis et la fiche client.
 |D8 |Import CSV (aperçu, correspondance, doublons), export CSV des listes et des contacts pour une action commerciale ; pas d'envoi groupé.
 |===
@@ -116,7 +116,8 @@ effacées ; les autres activités et les opportunités le perdent comme contact.
 
 === D-CRM-013 — Pipeline : HTMX d'abord, sans Opal
 
-Chaque carte porte ses boutons « ← » et « → » (formulaires ordinaires,
+Chaque carte porte ses boutons flèche gauche et flèche droite (icônes
+`arrow-left` et `arrow-right` de la planche commune ; formulaires ordinaires,
 utilisables sans JavaScript, au clavier et au toucher) et « Autre étape… » ;
 HTMX remplace le seul tableau et la région d'état annonce le déplacement.
 `crm/js/pipeline.js` (une centaine de lignes) ajoute le glisser-déposer et
@@ -148,24 +149,38 @@ et les gabarits `ui/reference/*.html` (tri, filtres HTMX, pages, export CSV,
 erreurs reliées aux champs) ; gabarits propres pour le pipeline, les tableaux
 de bord, « Mes activités », l'import et le paramétrage.
 
+=== D-CRM-017 — Tuile par le point d'accroche de l'interface
+
+`ui/bulma/dashboard_tile.cr` déclare la tuile « Commercial » par
+`PartiduoUi::Extensions.tile "CRM"` (partiduo-ui-bulma, D-HOOK-001 de
+partiduo-app/DECISIONS) : l'interface ne l'appelle que si l'extension est
+active et l'ajoute aux trois tableaux de bord (complet, micro-entreprise,
+profession libérale). La redéfinition de `PartiduoUi::Dashboard#build`
+(`previous_def`) est retirée.
+
+=== D-CRM-018 — Icônes
+
+Icônes de la planche commune (Lucide, ajoutées à partiduo-ui-bulma) :
+`kanban` pour le pipeline, `arrow-right` pour « Changer d'étape »,
+`arrow-left` et `arrow-right` sur les boutons des cartes, `phone` et `mail`
+pour les actions « Appeler » (`tel:`) et « Écrire » (`mailto:`) d'une
+organisation et d'un contact (pas pour un contact opposé à la prospection),
+et devant la nature d'une activité dans « Mes activités » (appel, courriel,
+rendez-vous, tâche, note). Numéros de téléphone des fiches en liens `tel:`.
+
 == Blocages
 
-=== B-CRM-001 — Pas de point d'accroche pour une tuile de tableau de bord
+=== B-CRM-001 — Pas de point d'accroche pour une tuile de tableau de bord — *levé le 29 septembre 2026*
 
-`partiduo-ui-bulma` n'offre aux extensions qu'un compteur de menu et une ligne
-de « À traiter » (`PartiduoUi::Extensions.counter`). *Contournement* :
-`ui/bulma/dashboard_tile.cr` complète `PartiduoUi::Dashboard#build`
-(`previous_def`) pour ajouter la tuile « Commercial », sans modifier le dépôt
-d'interface. À remplacer par un `PartiduoUi::Extensions.tile` quand il
-existera. Les tableaux de bord simplifiés (micro-entreprise, profession
-libérale) n'ont pas la tuile.
+`partiduo-ui-bulma` offre désormais `PartiduoUi::Extensions.tile` ; le
+contournement (redéfinition de `PartiduoUi::Dashboard#build`) est retiré et
+la tuile paraît aussi sur les tableaux de bord simplifiés (D-CRM-017).
 
-=== B-CRM-002 — Planche d'icônes restreinte
+=== B-CRM-002 — Planche d'icônes restreinte — *levé le 29 septembre 2026*
 
-La planche Lucide de l'interface n'a ni `kanban`, ni `phone`, ni `mail`, ni
-flèches : icônes génériques (`layout-dashboard`, `calendar`, `user`,
-`send`…) et flèches en caractères dans le pipeline. À enrichir dans
-`partiduo-ui-bulma`.
+`kanban`, `phone`, `mail`, `arrow-left` et `arrow-right` (Lucide 1.48.0,
+licence ISC, comme la planche) sont ajoutées à `partiduo-ui-bulma` et
+utilisées par le CRM (D-CRM-018).
 
 === B-CRM-003 — CI non exécutée
 
@@ -175,8 +190,9 @@ tourné ; format, Ameba et specs passent en local.
 
 == Specs du dernier passage
 
-`crystal spec --order random --no-debug` : *70 exemples, 0 échec* (règles,
-contrat, événements, droits, RGPD, import CSV, migration, conventions,
-écrans avec le client de test). Ameba : aucune remarque. Côté cœur :
-specs Facturation, modules, cartes et architecture de partiduo-app vertes
-(195 + 57 exemples) après l'ajout de `quote.decided`.
+`crystal spec --order random --no-debug` (29 septembre 2026) : *72
+exemples, 0 échec* (règles, contrat, événements, droits, RGPD, import CSV,
+migration, conventions, écrans avec le client de test, tuile sur les
+tableaux de bord simplifiés, icônes). Ameba : aucune remarque. La spec du
+pipeline compare désormais la clôture à un instant UTC : elle échouait
+quand la date du dossier (son fuseau) précédait la date UTC.
