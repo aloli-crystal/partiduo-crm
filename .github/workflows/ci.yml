@@ -2,7 +2,6 @@
 #
 # CI de partiduo-crm (extension CRM, ADR-009) : format, Ameba,
 # specs sur PostgreSQL (cœur, interface et extension, migrations comprises).
-# Non exécutée tant que les dépôts ne sont pas publiés (BLOCAGES B-002).
 name: CI
 
 on:
