@@ -51,6 +51,31 @@ describe "Écrans de la relation client sous /ext/CRM/ (ADR-009, ADR-005)" do
     dashboard.should contain("1 activité commerciale à faire")
   end
 
+  it "ajoute aussi la tuile « Commercial » aux tableaux de bord simplifiés (point d'accroche de l'interface)" do
+    browser = signed_in
+    S.opportunity("Agencement", amount: "10000")
+    Partiduo::Api::Modules.deactivate(S.system, "ANALYTIC").success?.should be_true
+    Partiduo::Api::Modules.deactivate(S.system, "ACCOUNTING").success?.should be_true
+    Partiduo::Api::Modules.activate(S.system, "LIBERAL").success?.should be_true
+    Partiduo::Api::Liberal.load_defaults(S.system)
+    liberal = browser.get("/").html
+    liberal.should contain(%(href="/liberal/receipts"))
+    liberal.should contain(%(data-module="CRM"))
+    liberal.should contain("pipeline pondéré, 1 opportunité ouverte")
+
+    Partiduo::Api::Modules.activate(S.system, "MICRO").success?.should be_true
+    Partiduo::Api::Micro.load_defaults(S.system)
+    micro = browser.get("/").html
+    micro.should contain(%(href="/micro/receipts"))
+    micro.should contain(%(data-module="CRM"))
+    micro.should contain("1\u202F000,00")
+  end
+
+  it "n'ajoute pas la tuile quand l'extension est inactive" do
+    browser = PartiduoUi::Books.admin
+    browser.get("/").html.should_not contain(%(data-module="CRM"))
+  end
+
   it "affiche le tableau de bord commercial sur une période" do
     browser = signed_in
     won = S.opportunity("Gagnée", amount: "7000")

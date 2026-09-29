@@ -2,10 +2,11 @@
 
 module Crm
   module Ui
-    # Tuile « Commercial » du tableau de bord du dossier (ADR-009 D6) :
+    # Tuile « Commercial » des tableaux de bord du dossier (ADR-009 D6) :
     # pipeline pondéré, opportunités ouvertes, activités en retard, lus par
     # `Crm::Api.tile` (rien si l'extension est inactive ou l'acteur sans
-    # droit).
+    # droit). Elle paraît sur le tableau de bord complet comme sur ceux du
+    # mode simplifié (micro-entreprise, profession libérale).
     module Tile
       def self.for(actor : Partiduo::Api::Actor, fmt : PartiduoUi::Format) : PartiduoUi::Dashboard::Tile?
         view = Api.tile(actor) || return
@@ -18,17 +19,8 @@ module Crm
   end
 end
 
-# L'interface commune n'offre pas encore aux extensions de point
-# d'accroche pour une tuile du tableau de bord (seulement un compteur de
-# menu et une ligne de « À traiter ») : la tuile est ajoutée en complétant
-# la construction du tableau de bord, sans modifier `partiduo-ui-bulma`
-# (BLOCAGES B-CRM-001, à remplacer par le point d'accroche quand il existera).
-module PartiduoUi
-  class Dashboard
-    def build : self
-      previous_def
-      Crm::Ui::Tile.for(@actor, @fmt).try { |tile| tiles << tile }
-      self
-    end
-  end
+# Point d'accroche de l'interface commune (`PartiduoUi::Extensions.tile`) :
+# appelé seulement quand l'extension est active.
+PartiduoUi::Extensions.tile Crm::CODE do |actor, fmt|
+  Crm::Ui::Tile.for(actor, fmt).try { |tile| [tile] } || [] of PartiduoUi::Dashboard::Tile
 end
