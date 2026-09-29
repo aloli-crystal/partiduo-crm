@@ -107,8 +107,9 @@ describe "Relation client — opportunités et pipeline (ADR-009 D3)" do
     proposal.weighted_amount.should eq(S.d("1750"))
     pipeline.weighted_amount.should eq(S.d("1750"))
     Api.pipeline(S.reader, owner_id: S.user_id("bruno@example.com")).columns[2].opportunities.map(&.title).should eq(["C"])
-    # Closes depuis plus de 30 jours : hors de la colonne.
-    Api.pipeline(S.reader, closed_since: S.today + 1.day).columns[4].opportunities.should be_empty
+    # Closes avant la date donnée : hors de la colonne. Instant UTC : la date
+    # du dossier (son fuseau) peut précéder celle de la clôture, horodatée en UTC.
+    Api.pipeline(S.reader, closed_since: Time.utc + 1.day).columns[4].opportunities.should be_empty
   end
 
   it "filtre la liste des opportunités" do
