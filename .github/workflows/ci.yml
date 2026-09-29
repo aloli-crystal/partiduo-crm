@@ -8,6 +8,8 @@ on:
   push:
     branches: [development, production]
   pull_request:
+  # Lancement manuel (onglet Actions ou `gh workflow run ci.yml`).
+  workflow_dispatch:
 
 env:
   CRYSTAL_VERSION: "1.19.1"
